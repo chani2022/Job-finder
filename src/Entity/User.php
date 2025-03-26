@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
@@ -36,6 +37,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
             processor: PostUserProcessor::class
         ),
         new Put(),
+        new Delete()
     ]
 )]
 
