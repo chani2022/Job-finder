@@ -3,41 +3,115 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use App\Repository\UserRepository;
+use App\State\PostUserProcessor;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\SerializedName;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
+
+#[ApiResource(
+    inputFormats: [
+        "json" => ["application/json"]
+    ],
+    outputFormats: [
+        'jsonld' => ['application/ld+json'],
+    ],
+    normalizationContext: ["groups" => ["read:user:get", "read:user:collection"], 'skip_null_values' => false],
+    denormalizationContext: ["groups" => ["write:user"]],
+    operations: [
+        new GetCollection(),
+        new Get(),
+        new Post(
+            denormalizationContext: ["groups" => ["post:create:user"]],
+            validationContext: ["groups" => ["post:create:validator"]],
+            processor: PostUserProcessor::class
+        ),
+        new Put(),
+    ]
+)]
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
-#[ApiResource()]
+#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email', "username"])]
+#[UniqueEntity(fields: ["email"], groups: ["post:create:validator"])]
+#[UniqueEntity(fields: ["username"], groups: ["post:create:validator"])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[
+        ORM\Column,
+        Groups(["read:user:get", "read:user:collection"])
+    ]
     private ?int $id = null;
 
-    #[ORM\Column(length: 180)]
+    #[
+        ORM\Column(length: 180),
+        Groups(["read:user:get", "read:user:collection", "post:create:user"]),
+        Assert\NotBlank(groups: ["post:create:validator"]),
+        Assert\Email(groups: ["post:create:validator"])
+    ]
     private ?string $email = null;
 
     /**
      * @var list<string> The user roles
      */
-    #[ORM\Column]
+    #[
+        ORM\Column,
+        Groups(["read:user:get", "read:user:collection"])
+    ]
     private array $roles = [];
 
     /**
      * @var string The hashed password
      */
-    #[ORM\Column]
+    #[
+        ORM\Column,
+        Groups(["read:user:get", "read:user:collection"]),
+    ]
     private ?string $password = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[
+        ORM\Column(length: 255, nullable: true),
+        Groups(["read:user:get", "read:user:collection"])
+    ]
     private ?string $nom = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[
+        ORM\Column(length: 255, nullable: true),
+        Groups(["read:user:get", "read:user:collection"])
+    ]
     private ?string $prenom = null;
+
+    #[
+        Groups(["post:create:user"]),
+        SerializedName("Mot de passe"),
+        Assert\NotBlank(groups: ["post:create:validator"])
+    ]
+    public ?string $plainPassword = null;
+
+    #[
+        Groups(["post:create:user"]),
+        SerializedName("Confirmez votre mot de passe"),
+        Assert\NotBlank(groups: ["post:create:validator"]),
+        Assert\EqualTo(propertyPath: "plainPassword", groups: ["post:create:validator"])
+    ]
+    public ?string $confirmationPassword = null;
+
+    #[
+        Groups(["read:user:get", "read:user:collection", "post:create:user"]),
+        ORM\Column(length: 255),
+        Assert\NotBlank(groups: ["post:create:validator"]),
+    ]
+    private ?string $username = null;
 
     public function getId(): ?int
     {
@@ -111,7 +185,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function eraseCredentials(): void
     {
         // If you store any temporary, sensitive data on the user, clear it here
-        // $this->plainPassword = null;
+        $this->plainPassword = null;
+        $this->confirmationPassword = null;
     }
 
     public function getNom(): ?string
@@ -134,6 +209,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPrenom(?string $prenom): static
     {
         $this->prenom = $prenom;
+
+        return $this;
+    }
+
+    public function getUsername(): ?string
+    {
+        return $this->username;
+    }
+
+    public function setUsername(string $username): static
+    {
+        $this->username = $username;
 
         return $this;
     }
