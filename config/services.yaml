@@ -26,3 +26,5 @@ services:
         class: App\EventListener\JWTCreatedListener
         tags:
             - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_created, method: onJWTCreated }
+    App\Faker\CustomFaker:
+        tags: [ { name: nelmio_alice.faker.provider } ]

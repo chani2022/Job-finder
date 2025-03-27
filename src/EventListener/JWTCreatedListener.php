@@ -4,7 +4,6 @@ namespace App\EventListener;
 // src/App/EventListener/JWTCreatedListener.php
 
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTCreatedEvent;
-use Symfony\Component\HttpFoundation\RequestStack;
 use App\Entity\User;
 
 class JWTCreatedListener
@@ -26,6 +25,7 @@ class JWTCreatedListener
         $payload['prenom'] = $user->getPrenom();
         $payload['password'] = $user->getPassword();
         $payload['email'] = $user->getEmail();
+        $payload['username'] = $user->getUsername();
 
         $event->setData($payload);
     }

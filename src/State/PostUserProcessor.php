@@ -23,13 +23,14 @@ class PostUserProcessor implements ProcessorInterface
         if (!$data instanceof User) return;
         // Handle the state
         $data->setPassword(
-            $this->hasher->hashPassword($data, $data->confirmationPassword)
+            $this->hasher->hashPassword($data, $data->getConfirmationPassword())
         );
 
         $data->eraseCredentials();
 
         $this->em->persist($data);
         $this->em->flush();
+
         return $data;
     }
 }

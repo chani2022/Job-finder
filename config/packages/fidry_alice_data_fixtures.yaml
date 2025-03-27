@@ -1,0 +1,10 @@
+# app/config/config.yml
+
+# Default config
+fidry_alice_data_fixtures:
+    default_purge_mode: delete
+    db_drivers:
+        doctrine_orm: ~
+        # doctrine_mongodb_odm: ~
+        # doctrine_phpcr_odm: ~
+        # eloquent_orm: ~
