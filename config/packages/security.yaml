@@ -1,4 +1,7 @@
 security:
+    role_hierarchy:
+        ROLE_ADMIN:       ROLE_USER
+        ROLE_SUPER_ADMIN: [ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
@@ -9,24 +12,38 @@ security:
             entity:
                 class: App\Entity\User
                 # property: email
+        jwt:
+            lexik_jwt:
+                class: App\Entity\User
+
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+        login:
+            pattern: ^/api/login
+            stateless: true
+            provider: app_user_provider
+            json_login:
+                check_path: /api/login_check # The name in routes.yaml is enough for mapping
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
         api:
             pattern: ^/api/
             stateless: true
-            provider: app_user_provider
+            provider: jwt
             jwt: ~
-        main:
-            # stateless: true
-            provider: app_user_provider
-            json_login:
-                check_path: /auth # The name in routes.yaml is enough for mapping
-                username_path: email
-                password_path: password
-                success_handler: lexik_jwt_authentication.handler.authentication_success
-                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+        
+
+        # main:
+        #     stateless: true
+        #     provider: app_user_provider
+        #     json_login:
+        #         check_path: /auth # The name in routes.yaml is enough for mapping
+        #         username_path: email
+        #         password_path: password
+        #         success_handler: lexik_jwt_authentication.handler.authentication_success
+        #         failure_handler: lexik_jwt_authentication.handler.authentication_failure
             # jwt: ~
 
             # activate different ways to authenticate
@@ -40,7 +57,7 @@ security:
     access_control:
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
-        - { path: ^/auth, roles: PUBLIC_ACCESS }
+        - { path: ^/api/login, roles: PUBLIC_ACCESS }
 
 when@test:
     security:

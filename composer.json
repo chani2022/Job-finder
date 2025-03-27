@@ -7,6 +7,7 @@
         "php": ">=8.2",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "api-platform/core": "^4.1",
         "api-platform/doctrine-orm": "*",
         "api-platform/symfony": "*",
         "doctrine/dbal": "^3",
@@ -38,7 +39,10 @@
             "symfony/flex": true,
             "symfony/runtime": true
         },
-        "sort-packages": true
+        "sort-packages": true,
+        "platform": {
+            "php": "8.2"
+        }
     },
     "autoload": {
         "psr-4": {
@@ -65,11 +69,16 @@
             "cache:clear": "symfony-cmd",
             "assets:install %PUBLIC_DIR%": "symfony-cmd"
         },
+        "CI": {
+            "phpunit": "symfony php bin/phpunit"
+        },
         "post-install-cmd": [
-            "@auto-scripts"
+            "@auto-scripts",
+            "@CI"
         ],
         "post-update-cmd": [
-            "@auto-scripts"
+            "@auto-scripts",
+            "@CI"
         ]
     },
     "conflict": {
@@ -82,7 +91,14 @@
         }
     },
     "require-dev": {
+        "hautelook/alice-bundle": "^2.15",
+        "phpunit/phpunit": "^11.5",
+        "symfony/browser-kit": "7.1.*",
+        "symfony/css-selector": "7.1.*",
+        "symfony/http-client": "7.1.*",
         "symfony/maker-bundle": "^1.62",
-        "symfony/web-profiler-bundle": "7.1.*"
+        "symfony/phpunit-bridge": "^7.2",
+        "symfony/web-profiler-bundle": "7.1.*",
+        "theofidry/alice-data-fixtures": "*"
     }
 }

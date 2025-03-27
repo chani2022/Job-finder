@@ -8,15 +8,20 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use ApiPlatform\OpenApi\Model\Operation;
 use App\Repository\UserRepository;
+use App\State\ChangePasswordProcessor;
 use App\State\PostUserProcessor;
 use Doctrine\ORM\Mapping as ORM;
+use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Serializer\Attribute\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\Validator\Constraints as SecurityAssert;
+
 
 
 #[ApiResource(
@@ -37,6 +42,18 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
             processor: PostUserProcessor::class
         ),
         new Put(),
+        new Put(
+            security: "is_granted('ROLE_USER')",
+            securityMessage: "unAuthorized",
+            uriTemplate: "/change-password/{id}",
+            name: "api_change_password",
+            processor: ChangePasswordProcessor::class,
+            denormalizationContext: ["groups" => ["put:changePassword:user"]],
+            validationContext: ["groups" => ["put:changePassword:validator"]],
+            openapi: new Operation(
+                summary: "Modification mot de passe",
+            )
+        ),
         new Delete()
     ]
 )]
@@ -45,7 +62,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email', "username"])]
 #[UniqueEntity(fields: ["email"], groups: ["post:create:validator"])]
 #[UniqueEntity(fields: ["username"], groups: ["post:create:validator"])]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -94,17 +111,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $prenom = null;
 
     #[
-        Groups(["post:create:user"]),
-        SerializedName("Mot de passe"),
-        Assert\NotBlank(groups: ["post:create:validator"])
+        Groups(["post:create:user", "put:changePassword:user"]),
+        SerializedName("password"),
+        Assert\NotBlank(groups: ["post:create:validator", "put:changePassword:validator"]),
+        SecurityAssert\UserPassword(
+            message: 'Wrong value for your current password',
+            groups: ['put:changePassword:validator']
+        )
     ]
-    public ?string $plainPassword = null;
+    private ?string $plainPassword = null;
 
     #[
-        Groups(["post:create:user"]),
-        SerializedName("Confirmez votre mot de passe"),
-        Assert\NotBlank(groups: ["post:create:validator"]),
-        Assert\EqualTo(propertyPath: "plainPassword", groups: ["post:create:validator"])
+        Groups(["put:changePassword:user"]),
+        Assert\NotBlank(groups: ["put:changePassword:validator"])
+    ]
+    private ?string $newPassword = null;
+
+    #[
+        Groups(["post:create:user", "put:changePassword:user"]),
+        Assert\NotBlank(groups: ["post:create:validator", "put:changePassword:validator"]),
+        Assert\EqualTo(propertyPath: "plainPassword", groups: ["post:create:validator"]),
+        Assert\EqualTo(propertyPath: "newPassword", groups: ["put:changePassword:validator"])
     ]
     public ?string $confirmationPassword = null;
 
@@ -118,6 +145,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function setId(?int $id): static
+    {
+        $this->id = $id;
+
+        return $this;
     }
 
     public function getEmail(): ?string
@@ -189,6 +223,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // If you store any temporary, sensitive data on the user, clear it here
         $this->plainPassword = null;
         $this->confirmationPassword = null;
+        $this->newPassword = null;
     }
 
     public function getNom(): ?string
@@ -225,5 +260,56 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->username = $username;
 
         return $this;
+    }
+
+    public function setNewPassword(?string $newPassword): static
+    {
+        $this->newPassword = $newPassword;
+
+        return $this;
+    }
+
+    public function getNewPassword(): ?string
+    {
+        return $this->newPassword;
+    }
+
+    public function setPlainPassword(?string $plainPassword): static
+    {
+        $this->plainPassword = $plainPassword;
+
+        return $this;
+    }
+
+    public function getPlainPassword(): ?string
+    {
+        return $this->plainPassword;
+    }
+
+    public function setConfirmationPassword(?string $confirmPassword): static
+    {
+        $this->confirmationPassword = $confirmPassword;
+
+        return $this;
+    }
+
+    public function getConfirmationPassword(): ?string
+    {
+        return $this->confirmationPassword;
+    }
+
+    public static function createFromPayload($id, array $payload)
+    {
+        $user =  new User();
+        $user->setId($id);
+        foreach ($payload as $prop => $value) {
+            $method = 'set' . ucfirst($prop);
+            if (method_exists($user, $method)) {
+                call_user_func([$user, $method], $value);
+            }
+        }
+
+
+        return $user;
     }
 }
