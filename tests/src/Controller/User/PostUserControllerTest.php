@@ -1,29 +1,30 @@
 <?php
 
-namespace App\Tests\src\Entity;
+namespace App\Tests\src\Controller\User;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use ApiPlatform\Symfony\Bundle\Test\Client;
 use ApiPlatform\Symfony\Bundle\Test\Response;
 use App\Entity\User;
-use App\Tests\src\Trait\FixturesTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response as HttpFoundationResponse;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use App\Traits\FixturesTrait;
 
-class UserTest extends ApiTestCase
+class PostUserControllerTest extends ApiTestCase
 {
     use RefreshDatabaseTrait;
     use FixturesTrait;
 
-    private Client $client;
-    private EntityManagerInterface $em;
-    private UserPasswordHasherInterface $hasher;
+    private ?Client $client = null;
+    private ?EntityManagerInterface $em = null;
+    private ?UserPasswordHasherInterface $hasher = null;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
+        parent::setUp();
         $this->client = static::createClient([], [
             'headers' => [
                 'accept' => 'application/ld+json',
@@ -136,7 +137,11 @@ class UserTest extends ApiTestCase
 
     protected function tearDown(): void
     {
+        $this->client = null;
+        $this->em = null;
+        $this->hasher = null;
         parent::tearDown();
+
         // Réinitialise le kernel entre les tests
         static::ensureKernelShutdown();
     }
