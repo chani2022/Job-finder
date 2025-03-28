@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\src\Trait;
+namespace App\Traits;
 
 use Hautelook\AliceBundle\PhpUnit\FixtureStore;
 

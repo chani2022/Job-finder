@@ -12,6 +12,7 @@ use ApiPlatform\OpenApi\Model\Operation;
 use App\Repository\UserRepository;
 use App\State\ChangePasswordProcessor;
 use App\State\PostUserProcessor;
+use App\State\ProfilUserProcessor;
 use Doctrine\ORM\Mapping as ORM;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -21,7 +22,6 @@ use Symfony\Component\Serializer\Attribute\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\Validator\Constraints as SecurityAssert;
-
 
 
 #[ApiResource(
@@ -42,10 +42,20 @@ use Symfony\Component\Security\Core\Validator\Constraints as SecurityAssert;
             processor: PostUserProcessor::class
         ),
         new Put(),
+        new Post(
+            security: "is_granted('ROLE_USER')",
+            uriTemplate: "/profil",
+            processor: ProfilUserProcessor::class,
+            denormalizationContext: ['groups' => "post:update:profil"],
+            validationContext: ["groups" => "profil:validator"],
+            openapi: new Operation(
+                summary: 'Permet de mettre à jour le profil'
+            )
+        ),
         new Put(
             security: "is_granted('ROLE_USER')",
             securityMessage: "unAuthorized",
-            uriTemplate: "/change-password/{id}",
+            uriTemplate: "/change-password",
             name: "api_change_password",
             processor: ChangePasswordProcessor::class,
             denormalizationContext: ["groups" => ["put:changePassword:user"]],
@@ -60,8 +70,8 @@ use Symfony\Component\Security\Core\Validator\Constraints as SecurityAssert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email', "username"])]
-#[UniqueEntity(fields: ["email"], groups: ["post:create:validator"])]
-#[UniqueEntity(fields: ["username"], groups: ["post:create:validator"])]
+#[UniqueEntity(fields: ["email"], groups: ["post:create:validator", "profil:validator"])]
+#[UniqueEntity(fields: ["username"], groups: ["post:create:validator", "profil:validator"])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUserInterface
 {
     #[ORM\Id]
@@ -74,9 +84,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
 
     #[
         ORM\Column(length: 180),
-        Groups(["read:user:get", "read:user:collection", "post:create:user"]),
-        Assert\NotBlank(groups: ["post:create:validator"]),
-        Assert\Email(groups: ["post:create:validator"])
+        Groups(["read:user:get", "read:user:collection", "post:create:user", "post:update:profil"]),
+        Assert\NotBlank(groups: ["post:create:validator", "profil:validator"]),
+        Assert\Email(groups: ["post:create:validator", "profil:validator"])
     ]
     private ?string $email = null;
 
@@ -100,13 +110,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
 
     #[
         ORM\Column(length: 255, nullable: true),
-        Groups(["read:user:get", "read:user:collection"])
+        Groups(["read:user:get", "read:user:collection", "post:update:profil"]),
+        Assert\NotBlank(groups: ["profil:validator"])
     ]
     private ?string $nom = null;
 
     #[
         ORM\Column(length: 255, nullable: true),
-        Groups(["read:user:get", "read:user:collection"])
+        Groups(["read:user:get", "read:user:collection", "post:update:profil"]),
+        Assert\NotBlank(groups: ["profil:validator"])
     ]
     private ?string $prenom = null;
 
@@ -136,9 +148,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     public ?string $confirmationPassword = null;
 
     #[
-        Groups(["read:user:get", "read:user:collection", "post:create:user"]),
+        Groups(["read:user:get", "read:user:collection", "post:create:user", "post:update:profil"]),
         ORM\Column(length: 255),
-        Assert\NotBlank(groups: ["post:create:validator"]),
+        Assert\NotBlank(groups: ["post:create:validator", "profil:validator"]),
     ]
     private ?string $username = null;
 

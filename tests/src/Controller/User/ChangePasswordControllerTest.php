@@ -1,29 +1,28 @@
 <?php
 
-namespace App\Tests\src\Entity;
+namespace App\Tests\src\Controller\User;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use ApiPlatform\Symfony\Bundle\Test\Client;
-use App\Tests\src\Trait\FixturesTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use App\Entity\User;
 use ApiPlatform\Symfony\Bundle\Test\Response;
-use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use App\Traits\FixturesTrait;
 
-class ChangePasswordTest extends ApiTestCase
+class ChangePasswordControllerTest extends ApiTestCase
 {
     use RefreshDatabaseTrait;
     use FixturesTrait;
 
-    private EntityManagerInterface $em;
-    private UserPasswordHasherInterface $hasher;
-    private Client $client;
-    private JWTTokenManagerInterface $jWTTokenManager;
+    private ?EntityManagerInterface $em = null;
+    private ?UserPasswordHasherInterface $hasher = null;
+    private ?Client $client = null;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
+        parent::setUp();
         $this->client = static::createClient([], [
             'headers' => [
                 'Content-Type' => 'application/json',
@@ -33,13 +32,12 @@ class ChangePasswordTest extends ApiTestCase
 
         $this->em = static::getContainer()->get(EntityManagerInterface::class);
         $this->hasher = static::getContainer()->get(UserPasswordHasherInterface::class);
-        $this->jWTTokenManager = static::getContainer()->get(JWTTokenManagerInterface::class);
         $this->loadFixturesTrait();
     }
 
     public function testPutChangePasswordUserNotAuth(): void
     {
-        $this->client->request("PUT", "/api/change-password/1", [
+        $this->client->request("PUT", "/api/change-password", [
             "json" => [
                 "password" => "test",
                 "newPassword" => "motdepasse",
@@ -57,7 +55,7 @@ class ChangePasswordTest extends ApiTestCase
 
         $this->client->loginUser($user_1);
         /** @var Response $response */
-        $response = $this->client->request("PUT", "/api/change-password/" . $user_1->getId(), [
+        $response = $this->client->request("PUT", "/api/change-password", [
             'json' => [
                 "password" => "test",
                 "newPassword" => "motdepasse",
@@ -81,7 +79,7 @@ class ChangePasswordTest extends ApiTestCase
 
         $this->client->loginUser($user_1);
         /** @var Response $response */
-        $response = $this->client->request("PUT", "/api/change-password/" . $user_1->getId(), [
+        $response = $this->client->request("PUT", "/api/change-password", [
             'json' => $userData
         ]);
 
@@ -107,7 +105,7 @@ class ChangePasswordTest extends ApiTestCase
             ],
             "2 password not match" => [
                 ["password" => "test", "newPassword" => "test", "confirmationPassword" => "confirm"],
-                2
+                1
             ]
         ];
     }
@@ -115,6 +113,9 @@ class ChangePasswordTest extends ApiTestCase
     protected function tearDown(): void
     {
         parent::tearDown();
+        $this->em = null;
+        $this->client = null;
+        $this->hasher = null;
         // Réinitialise le kernel entre les tests
         static::ensureKernelShutdown();
     }
