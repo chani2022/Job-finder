@@ -9,11 +9,13 @@ class CustomFaker
 {
     private UserPasswordHasherInterface $hasher;
 
-    public function __construct(UserPasswordHasherInterface $hasher){
+    public function __construct(UserPasswordHasherInterface $hasher)
+    {
         $this->hasher = $hasher;
     }
 
-    public function hashPassword(string $plainPassword): string {
+    public function hashPassword(string $plainPassword): string
+    {
 
         return $this->hasher->hashPassword(new User, $plainPassword);
     }

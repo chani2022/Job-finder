@@ -17,7 +17,7 @@ class ProfilUserProcessor implements ProcessorInterface
     private Security $security;
     private EntityManagerInterface $em;
 
-    public function __construct(JWTTokenManagerInterface $jWTTokenManager, Security $security, PersistProcessor $persistProcessor, EntityManagerInterface $em)
+    public function __construct(JWTTokenManagerInterface $jWTTokenManager, Security $security, EntityManagerInterface $em)
     {
         $this->jWTTokenManager = $jWTTokenManager;
         $this->security = $security;
