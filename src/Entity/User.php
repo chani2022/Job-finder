@@ -2,13 +2,18 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GraphQl\Mutation;
+use ApiPlatform\Metadata\GraphQl\Query;
+use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\OpenApi\Model\Operation;
+use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Repository\UserRepository;
 use App\State\ChangePasswordProcessor;
 use App\State\PostUserProcessor;
@@ -43,13 +48,44 @@ use Symfony\Component\Security\Core\Validator\Constraints as SecurityAssert;
         ),
         new Put(),
         new Post(
+            inputFormats: ['multipart' => ['multipart/form-data']],
             security: "is_granted('ROLE_USER')",
             uriTemplate: "/profil",
             processor: ProfilUserProcessor::class,
-            denormalizationContext: ['groups' => "post:update:profil"],
+            deserialize: false,
             validationContext: ["groups" => "profil:validator"],
             openapi: new Operation(
-                summary: 'Permet de mettre à jour le profil'
+                requestBody: new RequestBody(
+                    content: new \ArrayObject([
+                        'multipart/form-data' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'file' => [
+                                        'type' => 'string',
+                                        'format' => 'binary'
+                                    ],
+                                    'nom' => [
+                                        'type' => 'string',
+                                        'format' => 'string'
+                                    ],
+                                    'prenom' => [
+                                        'type' => 'string',
+                                        'format' => 'string'
+                                    ],
+                                    'email' => [
+                                        'type' => 'string',
+                                        'format' => 'email'
+                                    ],
+                                    'username' => [
+                                        'type' => 'string',
+                                        'format' => 'string'
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ])
+                )
             )
         ),
         new Put(
@@ -65,6 +101,13 @@ use Symfony\Component\Security\Core\Validator\Constraints as SecurityAssert;
             )
         ),
         new Delete()
+    ],
+    graphQlOperations: [
+        new Query(),
+        new QueryCollection(),
+        new Mutation(name: 'create'),
+        new Mutation(name: 'update'),
+        new Mutation(name: 'delete')
     ]
 )]
 
@@ -84,7 +127,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
 
     #[
         ORM\Column(length: 180),
-        Groups(["read:user:get", "read:user:collection", "post:create:user", "post:update:profil"]),
+        Groups(["read:user:get", "read:user:collection", "post:create:user"]),
         Assert\NotBlank(groups: ["post:create:validator", "profil:validator"]),
         Assert\Email(groups: ["post:create:validator", "profil:validator"])
     ]
@@ -110,14 +153,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
 
     #[
         ORM\Column(length: 255, nullable: true),
-        Groups(["read:user:get", "read:user:collection", "post:update:profil"]),
+        Groups(["read:user:get", "read:user:collection"]),
         Assert\NotBlank(groups: ["profil:validator"])
     ]
     private ?string $nom = null;
 
     #[
         ORM\Column(length: 255, nullable: true),
-        Groups(["read:user:get", "read:user:collection", "post:update:profil"]),
+        Groups(["read:user:get", "read:user:collection"]),
         Assert\NotBlank(groups: ["profil:validator"])
     ]
     private ?string $prenom = null;
@@ -148,11 +191,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     public ?string $confirmationPassword = null;
 
     #[
-        Groups(["read:user:get", "read:user:collection", "post:create:user", "post:update:profil"]),
+        Groups(["read:user:get", "read:user:collection", "post:create:user"]),
         ORM\Column(length: 255),
         Assert\NotBlank(groups: ["post:create:validator", "profil:validator"]),
     ]
     private ?string $username = null;
+
+    #[ORM\ManyToOne(targetEntity: MediaObject::class, cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: true)]
+    #[ApiProperty(types: ['https://schema.org/image'])]
+    #[
+        Groups(["read:user:get", "read:user:collection"])
+    ]
+    public ?MediaObject $image = null;
 
     public function getId(): ?int
     {
