@@ -7,6 +7,7 @@ use App\EventListener\JWTCreatedListener;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTCreatedEvent;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Vich\UploaderBundle\Storage\StorageInterface;
 
 class JWTCreatedListenerTest extends TestCase
 {
@@ -18,7 +19,8 @@ class JWTCreatedListenerTest extends TestCase
             "prenom" => "test",
             "password" => "test",
             "email" => "test@test.com",
-            "username" => "test"
+            "username" => "test",
+            'image' => null
         ];
         $user = (new User())
             ->setNom("test")
@@ -27,8 +29,10 @@ class JWTCreatedListenerTest extends TestCase
             ->setUsername("test")
             ->setPassword("test");
 
+        $mockStorage = $this->createMock(StorageInterface::class);
+
         $jwtCreatedEvent = new JWTCreatedEvent($data, $user);
-        $jwtCreatedListener = new JWTCreatedListener();
+        $jwtCreatedListener = new JWTCreatedListener($mockStorage);
 
         $dispatcher = new EventDispatcher();
         $dispatcher->addListener(JWTCreatedEvent::class, [$jwtCreatedListener, 'onJWTCreated']);

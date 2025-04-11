@@ -40,7 +40,12 @@ class ProfilUserControllerTest extends ApiTestCase
 
         /** @var Response $response */
         $response = $this->client->request("POST", "/api/profil", [
-            'json' => $data
+            'headers' => [
+                "content-type" => "multipart/form-data"
+            ],
+            'extra' => [
+                'parameters' => $data, // Vos données JSON (nom, prenom, email, username)
+            ]
         ]);
 
         $this->assertResponseStatusCodeSame(422);
@@ -50,11 +55,16 @@ class ProfilUserControllerTest extends ApiTestCase
     public function testProfilNeedRoleUser(): void
     {
         $this->client->request("POST", "/api/profil", [
-            'json' => [
-                "username" => "username",
-                "email" => "email@email.com",
-                "nom" => "nom",
-                "prenom" => "prenom"
+            'headers' => [
+                "content-type" => "multipart/form-data"
+            ],
+            'extra' => [
+                'parameters' => [
+                    "username" => "username",
+                    "email" => "email@email.com",
+                    "nom" => "nom",
+                    "prenom" => "prenom"
+                ]
             ]
         ]);
 
@@ -75,7 +85,12 @@ class ProfilUserControllerTest extends ApiTestCase
 
         /** @var Response $response */
         $response = $this->client->request("POST", "/api/profil", [
-            'json' => $data
+            'headers' => [
+                "content-type" => "multipart/form-data"
+            ],
+            'extra' => [
+                'parameters' => $data
+            ]
         ]);
 
         foreach ($data as $attr => $value) {
@@ -90,9 +105,13 @@ class ProfilUserControllerTest extends ApiTestCase
         $this->assertStringContainsString("token", $response->getBrowserKitResponse()->getContent());
         foreach ($data as $attr => $value) {
             $method = 'get' . ucfirst($attr);
+            if ($attr == "nom") {
+                $value = strtoupper($value);
+            } else if ($attr == "prenom") {
+                $value = ucwords($value);
+            }
             $this->assertEquals($value, call_user_func([$user, $method]));
         }
-        // $this->assertResponseStatusCodeSame(401);
     }
 
 
@@ -155,7 +174,7 @@ class ProfilUserControllerTest extends ApiTestCase
                 ["nom" => "", "prenom" => "", "email" => "", "username" => "username"],
                 3
             ],
-            "doublons email et username" => [
+            "unique email et username" => [
                 ["nom" => "nom", "prenom" => "prenom", "email" => "test@test.com", "username" => "test"],
                 2
             ],

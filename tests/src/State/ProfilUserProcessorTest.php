@@ -14,7 +14,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
-
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class ProfilUserProcessorTest extends KernelTestCase
 {
@@ -25,12 +25,14 @@ class ProfilUserProcessorTest extends KernelTestCase
     private ?JWTTokenManagerInterface $jWTTokenManager;
     private ?EntityManagerInterface $em;
     private ?Security $security;
+    private ?ValidatorInterface $validator;
 
     public function setUp(): void
     {
         $this->em = static::getContainer()->get(EntityManagerInterface::class);
         $this->jWTTokenManager = static::getContainer()->get(JWTTokenManagerInterface::class);
         $this->security = static::getContainer()->get(Security::class);
+        $this->validator = static::getContainer()->get(ValidatorInterface::class);
         $this->loadFixturesTrait();
     }
 
@@ -42,13 +44,18 @@ class ProfilUserProcessorTest extends KernelTestCase
         $this->logUserTrait($user_1);
 
         $data = ["username" => "username", "email" => "email@email.com"];
-        $request = new Request([], [], [], [], [], [], json_encode($data));
-        $request->headers->set("content-type", "application/json");
+        $request = new Request([], [], [], [], [], [], $data);
+        $request->headers->set("content-type", "multipart/form-data");
+        $request->request->set("username", "username");
+        $request->request->set("nom", "nom");
+        $request->request->set("prenom", "prenom");
+        $request->request->set("email", "email@email.com");
 
         $profilUserProcessor = new ProfilUserProcessor(
             $this->jWTTokenManager,
             $this->security,
-            $this->em
+            $this->em,
+            $this->validator
         );
 
         $post = new Post();

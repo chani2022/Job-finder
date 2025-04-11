@@ -19,8 +19,11 @@ api_platform:
             mime_types:
                 - multipart/form-data
 
+        graphql: ['application/graphql']
     swagger:
         api_keys:
             JWT:
                 name: Authorization
                 type: header
+    graphql:
+        enabled: true
