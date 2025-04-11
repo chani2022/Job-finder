@@ -5,10 +5,13 @@ namespace App\EventListener;
 
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTCreatedEvent;
 use App\Entity\User;
+use Vich\UploaderBundle\Storage\StorageInterface;
 
 class JWTCreatedListener
 {
-
+    public function __construct(
+        private readonly StorageInterface $storage
+    ) {}
     /**
      * @param JWTCreatedEvent $event
      *
@@ -26,6 +29,8 @@ class JWTCreatedListener
         $payload['password'] = $user->getPassword();
         $payload['email'] = $user->getEmail();
         $payload['username'] = $user->getUsername();
+
+        $payload['image'] = $user->image ? $this->storage->resolveUri($user->image, 'file') : null;
 
         $event->setData($payload);
     }
