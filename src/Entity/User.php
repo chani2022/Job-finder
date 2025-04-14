@@ -205,6 +205,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     ]
     public ?MediaObject $image = null;
 
+    #[
+        ORM\Column(type: 'boolean', options: ['default' => true]),
+        Groups(["read:user:get", "read:user:collection"])
+    ]
+    private ?bool $status = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -374,5 +380,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
 
 
         return $user;
+    }
+
+    public function isStatus(): ?bool
+    {
+        return $this->status;
+    }
+
+    public function setStatus(bool $status): static
+    {
+        $this->status = $status;
+
+        return $this;
     }
 }
