@@ -14,8 +14,10 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\RequestBody;
+use App\Controller\UserDisabledController;
 use App\Repository\UserRepository;
 use App\State\ChangePasswordProcessor;
+use App\State\DisabledUserProcessor;
 use App\State\PostUserProcessor;
 use App\State\ProfilUserProcessor;
 use Doctrine\ORM\Mapping as ORM;
@@ -85,7 +87,22 @@ use Symfony\Component\Security\Core\Validator\Constraints as SecurityAssert;
                             ]
                         ]
                     ])
-                )
+                ),
+                responses: [
+                    200 => [
+                        'description' => 'Profil modifiez avec success',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'token' => ['type' => 'string', 'example' => 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'],
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
             )
         ),
         new Put(
@@ -96,9 +113,16 @@ use Symfony\Component\Security\Core\Validator\Constraints as SecurityAssert;
             processor: ChangePasswordProcessor::class,
             denormalizationContext: ["groups" => ["put:changePassword:user"]],
             validationContext: ["groups" => ["put:changePassword:validator"]],
+        ),
+        new Put(
+            security: "is_granted('ROLE_ADMIN')",
+            uriTemplate: "/disabled/{id}",
+            name: "api_disabled_user",
+            processor: DisabledUserProcessor::class,
             openapi: new Operation(
-                summary: "Modification mot de passe",
+                summary: "Pour desactiver un utilisateur",
             )
+
         ),
         new Delete()
     ],

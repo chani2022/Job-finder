@@ -9,6 +9,12 @@ App\Entity\User:
         username: test
         password: <hashPassword('test')>
 
+    admin:
+        email: admin@admin.com
+        username: admin
+        password: <hashPassword('admin')>
+        roles: ['ROLE_ADMIN']
+
     user_disabled:
         email: disabled@test.com
         username: disabled

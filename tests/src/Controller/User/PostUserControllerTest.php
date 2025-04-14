@@ -27,7 +27,6 @@ class PostUserControllerTest extends ApiTestCase
         parent::setUp();
         $this->client = static::createClient([], [
             'headers' => [
-                'accept' => 'application/ld+json',
                 'content-type' => 'application/json'
             ]
         ]);
