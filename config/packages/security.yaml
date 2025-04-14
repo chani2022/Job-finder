@@ -28,6 +28,7 @@ security:
                 check_path: /api/login_check # The name in routes.yaml is enough for mapping
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
+            # user_checker:
         api:
             pattern: ^/api/
             stateless: true

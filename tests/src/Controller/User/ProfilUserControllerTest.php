@@ -10,6 +10,7 @@ use App\Traits\FixturesTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ProfilUserControllerTest extends ApiTestCase
 {
@@ -18,8 +19,8 @@ class ProfilUserControllerTest extends ApiTestCase
 
     protected ?User $user = null;
     private ?Client $client = null;
-    private JWTTokenManagerInterface $jWTTokenManager;
-    private EntityManagerInterface $em;
+    private ?JWTTokenManagerInterface $jWTTokenManager;
+    private ?EntityManagerInterface $em;
 
     protected function setUp(): void
     {
@@ -70,39 +71,43 @@ class ProfilUserControllerTest extends ApiTestCase
 
         $this->assertResponseStatusCodeSame(401);
     }
-
-    public function testProfilOk(): void
+    /**
+     * @dataProvider provideProfilOk
+     */
+    public function testProfilOk($data, $file): void
     {
         $user_1 = $this->all_fixtures['user_1'];
         $this->client->loginUser($user_1);
 
-        $data = [
-            "username" => "username",
-            "email" => "email@email.com",
-            "nom" => "nom",
-            "prenom" => "prenom"
+        $extra = [
+            "extra" => [
+                "parameters" => $data
+            ]
         ];
+        if ($file) {
+            $extra['extra']['files'] = [
+                "file" => $file['file']
+            ];
+        }
+
 
         /** @var Response $response */
         $response = $this->client->request("POST", "/api/profil", [
             'headers' => [
                 "content-type" => "multipart/form-data"
             ],
-            'extra' => [
-                'parameters' => $data
+
+            "extra" => [
+                "parameters" => $data,
+                "files" => $file
             ]
         ]);
 
-        foreach ($data as $attr => $value) {
-            $method = 'set' . ucfirst($attr);
-            if (method_exists($user_1, $method)) {
-                call_user_func([$user_1, $method], $value);
-            }
-        }
-
         $user = $this->em->getRepository(User::class)->find($user_1->getId());
 
-        $this->assertStringContainsString("token", $response->getBrowserKitResponse()->getContent());
+        // $this->assertJsonContains(["token", $response->getBrowserKitResponse()->getContent()]);
+        $this->assertJsonContains(["token" => $response->toArray()['token']]);
+
         foreach ($data as $attr => $value) {
             $method = 'get' . ucfirst($attr);
             if ($attr == "nom") {
@@ -112,9 +117,48 @@ class ProfilUserControllerTest extends ApiTestCase
             }
             $this->assertEquals($value, call_user_func([$user, $method]));
         }
+
+        if (count($file) > 0) {
+            $path_dest_file = static::getContainer()->getParameter('path_dest_images_test');
+            $paths = scandir($path_dest_file);
+            $file_name = null;
+            foreach ($paths as $r) {
+                if ($r != ".." and $r != ".") {
+                    if ($r . startsWith("test") and $r . endsWith(".png")) {
+                        $file_name = $path_dest_file . '' . $r;
+                    }
+                }
+            }
+            $this->assertFileExists($file_name);
+            // unlink($file_name);
+        }
     }
 
-
+    public static function provideProfilOk(): array
+    {
+        return [
+            "profil without file" => [
+                [
+                    "username" => "username",
+                    "email" => "email@email.com",
+                    "nom" => "nom",
+                    "prenom" => "prenom"
+                ],
+                []
+            ],
+            // "profil with file" => [
+            //     [
+            //         "username" => "username",
+            //         "email" => "email@email.com",
+            //         "nom" => "nom",
+            //         "prenom" => "prenom"
+            //     ],
+            //     [
+            //         "file" => new UploadedFile(path: static::getContainer()->getParameter('path_source_image_test') . 'test.png', originalName: 'test.png', test: true)
+            //     ]
+            // ]
+        ];
+    }
     public static function providePropsErrors(): array
     {
         return [
@@ -186,5 +230,7 @@ class ProfilUserControllerTest extends ApiTestCase
         parent::tearDown();
         $this->user = null;
         $this->client = null;
+        $this->em = null;
+        $this->jWTTokenManager = null;
     }
 }

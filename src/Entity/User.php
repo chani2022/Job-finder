@@ -197,7 +197,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     ]
     private ?string $username = null;
 
-    #[ORM\ManyToOne(targetEntity: MediaObject::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(targetEntity: MediaObject::class, cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: true)]
     #[ApiProperty(types: ['https://schema.org/image'])]
     #[

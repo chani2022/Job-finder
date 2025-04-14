@@ -64,8 +64,9 @@ class ProfilUserProcessorTest extends KernelTestCase
 
         $user_bdd = $this->em->getRepository(User::class)->find($user_1->getId());
 
-        $this->assertEquals("email@email.com", $user_1->getEmail());
+
         $this->assertEquals("username", $user_1->getUsername());
+        $this->assertEquals("email@email.com", $user_1->getEmail());
 
         $this->assertNotNull($user_bdd);
         $this->assertArrayHasKey("token", json_decode($user_process->getContent(), true));
