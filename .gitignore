@@ -10,6 +10,7 @@
 /public/media/*
 /public/coverage/*
 /fixtures/*.png
+
 ###< symfony/framework-bundle ###
 
 ###> lexik/jwt-authentication-bundle ###

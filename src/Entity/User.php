@@ -198,12 +198,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     private ?string $username = null;
 
     #[ORM\OneToOne(targetEntity: MediaObject::class, cascade: ['persist', 'remove'])]
+
     #[ORM\JoinColumn(nullable: true)]
     #[ApiProperty(types: ['https://schema.org/image'])]
     #[
         Groups(["read:user:get", "read:user:collection"])
     ]
     public ?MediaObject $image = null;
+
+    #[
+        ORM\Column(type: 'boolean', options: ['default' => true]),
+        Groups(["read:user:get", "read:user:collection"])
+    ]
+    private ?bool $status = null;
 
     public function getId(): ?int
     {
@@ -374,5 +381,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
 
 
         return $user;
+    }
+
+    public function isStatus(): ?bool
+    {
+        return $this->status;
+    }
+
+    public function setStatus(bool $status): static
+    {
+        $this->status = $status;
+
+        return $this;
     }
 }
