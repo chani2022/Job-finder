@@ -1,0 +1,5 @@
+App\Entity\Society:
+    society_{1..10}:
+        nom_society: <name()>
+    adm:
+        nom_society: "adm"

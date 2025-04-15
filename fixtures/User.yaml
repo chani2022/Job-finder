@@ -3,6 +3,7 @@ App\Entity\User:
         email: <email()>
         username: <username()>
         password: <hashPassword('test')>
+        society: '@society*'
 
     user_test_unique_props:
         email: test@test.com
@@ -14,6 +15,7 @@ App\Entity\User:
         username: admin
         password: <hashPassword('admin')>
         roles: ['ROLE_ADMIN']
+        society: '@adm'
 
     user_disabled:
         email: disabled@test.com

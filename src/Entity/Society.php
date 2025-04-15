@@ -43,7 +43,7 @@ class Society
 
     public function setNomSociety(string $nom_society): static
     {
-        $this->nom_society = $nom_society;
+        $this->nom_society = strtoupper($nom_society);
 
         return $this;
     }
