@@ -9,7 +9,6 @@
 /vendor/
 /public/media/*
 /public/coverage/*
-/fixtures/*.png
 
 ###< symfony/framework-bundle ###
 

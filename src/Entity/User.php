@@ -41,7 +41,9 @@ use Symfony\Component\Security\Core\Validator\Constraints as SecurityAssert;
     normalizationContext: ["groups" => ["read:user:get", "read:user:collection"], 'skip_null_values' => false],
     denormalizationContext: ["groups" => ["write:user"]],
     operations: [
-        new GetCollection(),
+        new GetCollection(
+            order: ['id' => 'DESC']
+        ),
         new Get(),
         new Post(
             denormalizationContext: ["groups" => ["post:create:user"]],
@@ -236,6 +238,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     ]
     private ?bool $status = null;
 
+    #[ORM\ManyToOne(inversedBy: 'users')]
+    private ?society $society = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -415,6 +420,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     public function setStatus(bool $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getSociety(): ?society
+    {
+        return $this->society;
+    }
+
+    public function setSociety(?society $society): static
+    {
+        $this->society = $society;
 
         return $this;
     }

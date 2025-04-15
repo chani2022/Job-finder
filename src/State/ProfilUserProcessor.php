@@ -48,6 +48,21 @@ class ProfilUserProcessor implements ProcessorInterface
             $user->image = $media;
         }
 
+        $user = $this->setProperties($user, $data);
+
+        /** @var ConstraintViolationListInterface $errors */
+        $errors = $this->validator->validate($user, null, ["profil:validator"]);
+        if ($errors->count() > 0) {
+            throw new ValidationException($errors);
+        }
+
+        $this->em->flush();
+
+        return new JsonResponse(["token" => $this->jWTTokenManager->create($user)]);
+    }
+
+    private function setProperties(User $user, array $data): ?User
+    {
         foreach ($data as $attr => $value) {
             $method = 'set' . ucfirst($attr);
             if (method_exists($user, $method)) {
@@ -60,14 +75,7 @@ class ProfilUserProcessor implements ProcessorInterface
                 call_user_func([$user, $method], $v);
             }
         }
-        /** @var ConstraintViolationListInterface $errors */
-        $errors = $this->validator->validate($user, null, ["profil:validator"]);
-        if ($errors->count() > 0) {
-            throw new ValidationException($errors);
-        }
 
-        $this->em->flush();
-
-        return new JsonResponse(["token" => $this->jWTTokenManager->create($user)]);
+        return $user;
     }
 }

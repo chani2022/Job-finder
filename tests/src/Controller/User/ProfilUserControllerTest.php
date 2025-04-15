@@ -80,32 +80,31 @@ class ProfilUserControllerTest extends ApiTestCase
         $this->client->loginUser($user_1);
 
         $extra = [
-            "extra" => [
-                "parameters" => $data
-            ]
+            'parameters' => $data
         ];
-        if ($file) {
-            $extra['extra']['files'] = [
-                "file" => $file['file']
-            ];
-        }
+        if ($file['file']) {
 
+            $path_source_file = static::getContainer()->getParameter('path_source_image_test') . 'test.png';
+            $tmp = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'test_upload_file.png';
+            /**
+             * pour ne pas effacer le fichier dans le dossier fixtures
+             * lors de l'instance de uploadedfile
+             */
+            copy($path_source_file, $tmp);
+            $file_to_upload = new UploadedFile($tmp, 'test.png');
+            $extra['files']['file'] = $file_to_upload;
+        }
 
         /** @var Response $response */
         $response = $this->client->request("POST", "/api/profil", [
             'headers' => [
                 "content-type" => "multipart/form-data"
             ],
-
-            "extra" => [
-                "parameters" => $data,
-                "files" => $file
-            ]
+            "extra" => $extra
         ]);
 
         $user = $this->em->getRepository(User::class)->find($user_1->getId());
 
-        // $this->assertJsonContains(["token", $response->getBrowserKitResponse()->getContent()]);
         $this->assertJsonContains(["token" => $response->toArray()['token']]);
 
         foreach ($data as $attr => $value) {
@@ -118,19 +117,21 @@ class ProfilUserControllerTest extends ApiTestCase
             $this->assertEquals($value, call_user_func([$user, $method]));
         }
 
-        if (count($file) > 0) {
+        if ($file['file']) {
+
             $path_dest_file = static::getContainer()->getParameter('path_dest_images_test');
             $paths = scandir($path_dest_file);
             $file_name = null;
             foreach ($paths as $r) {
                 if ($r != ".." and $r != ".") {
-                    if ($r . startsWith("test") and $r . endsWith(".png")) {
+                    if (str_starts_with($r, "test") and str_ends_with($r, ".png")) {
                         $file_name = $path_dest_file . '' . $r;
                     }
                 }
             }
             $this->assertFileExists($file_name);
-            // unlink($file_name);
+            unlink($file_name);
+            $this->assertFileDoesNotExist($file_name);
         }
     }
 
@@ -144,19 +145,21 @@ class ProfilUserControllerTest extends ApiTestCase
                     "nom" => "nom",
                     "prenom" => "prenom"
                 ],
-                []
+                [
+                    "file" => false,
+                ]
             ],
-            // "profil with file" => [
-            //     [
-            //         "username" => "username",
-            //         "email" => "email@email.com",
-            //         "nom" => "nom",
-            //         "prenom" => "prenom"
-            //     ],
-            //     [
-            //         "file" => new UploadedFile(path: static::getContainer()->getParameter('path_source_image_test') . 'test.png', originalName: 'test.png', test: true)
-            //     ]
-            // ]
+            "profil with file" => [
+                [
+                    "username" => "username",
+                    "email" => "email@email.com",
+                    "nom" => "nom",
+                    "prenom" => "prenom"
+                ],
+                [
+                    "file" => true
+                ]
+            ]
         ];
     }
     public static function providePropsErrors(): array
