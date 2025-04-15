@@ -15,6 +15,6 @@ final class UserListener
     {
         $object = $event->getObject();
         if (!$object instanceof User) return;
-        $object->setStatus(true);
+        $object->setStatus(false);
     }
 }

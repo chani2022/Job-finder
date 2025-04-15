@@ -52,6 +52,17 @@ class LoginControllerTest extends ApiTestCase
      */
     public function testAuthValid($identifiants): void
     {
+        $critaire = [];
+        foreach ($identifiants as $key => $v) {
+            if (str_contains($key, "@")) {
+                $critaire["email"] = $v;
+            } else {
+                $critaire['username'] = $v;
+            }
+        }
+        $user = $this->em->getRepository(User::class)->findOneBy($critaire);
+        $user->setStatus(true);
+
         /** @var Response */
         $response = $this->client->request("POST", "/api/login_check", [
             "json" => $identifiants

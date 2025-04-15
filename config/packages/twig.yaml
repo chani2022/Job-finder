@@ -1,5 +1,8 @@
 twig:
     file_name_pattern: '*.twig'
+    paths:
+        # point this wherever your images live
+        '%kernel.project_dir%/public/images': images
 
 when@test:
     twig:

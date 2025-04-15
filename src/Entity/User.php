@@ -233,13 +233,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     public ?MediaObject $image = null;
 
     #[
-        ORM\Column(type: 'boolean', options: ['default' => true]),
+        ORM\Column(type: 'boolean', options: ['default' => false]),
         Groups(["read:user:get", "read:user:collection"])
     ]
     private ?bool $status = null;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
-    private ?society $society = null;
+    private ?Society $society = null;
 
     public function getId(): ?int
     {
@@ -424,12 +424,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
         return $this;
     }
 
-    public function getSociety(): ?society
+    public function getSociety(): ?Society
     {
         return $this->society;
     }
 
-    public function setSociety(?society $society): static
+    public function setSociety(?Society $society): static
     {
         $this->society = $society;
 

@@ -4,28 +4,34 @@ namespace App\Tests\Src\State;
 
 use ApiPlatform\Metadata\Post;
 use App\Entity\User;
+use App\Mailer\ServiceMailer;
 use App\State\PostUserProcessor;
 use Doctrine\ORM\EntityManagerInterface;
 use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Bundle\FrameworkBundle\Test\MailerAssertionsTrait;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class PostUserProcessorTest extends KernelTestCase
 {
     use RefreshDatabaseTrait;
+    use MailerAssertionsTrait;
 
     private EntityManagerInterface $em;
     private UserPasswordHasherInterface $hasher;
+    private ?ServiceMailer $serviceMailer;
 
     public function setUp(): void
     {
         $this->em = static::getContainer()->get(EntityManagerInterface::class);
         $this->hasher = static::getContainer()->get(UserPasswordHasherInterface::class);
+        $this->serviceMailer = static::getContainer()->get(ServiceMailer::class);
     }
 
     public function testCreateUserProcess(): void
     {
-        $postUserProcessor = new PostUserProcessor($this->em, $this->hasher);
+        $postUserProcessor = new PostUserProcessor($this->em, $this->hasher, $this->serviceMailer);
 
         $user = (new User())
             ->setEmail("email@email.com")
@@ -43,5 +49,14 @@ class PostUserProcessorTest extends KernelTestCase
         $this->assertEquals($user->getEmail(), $user_process->getEmail());
 
         $this->assertNotNull($user_bdd);
+
+        //verification que l'email est envoyé
+        $this->assertEmailCount(1);
+
+        $email = $this->getMailerMessage();
+        $this->assertInstanceOf(Email::class, $email);
+        $this->assertEmailHeaderSame($email, 'from', $_ENV['GMAIL_SENDER']);
+        $this->assertEmailHeaderSame($email, 'to', $user_bdd->getEmail());
+        $this->assertEmailSubjectContains($email, 'Confirmation');
     }
 }

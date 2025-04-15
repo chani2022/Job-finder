@@ -18,6 +18,6 @@ class UserListenerTest extends TestCase
         $userListener = new UserListener();
         $userListener->prePersist($user, $prePersist);
 
-        $this->assertTrue($user->isStatus());
+        $this->assertNotTrue($user->isStatus());
     }
 }
