@@ -16,6 +16,7 @@ App\Entity\User:
         password: <hashPassword('admin')>
         roles: ['ROLE_ADMIN']
         society: '@adm'
+        status: true
 
     user_disabled:
         email: disabled@test.com

@@ -7,7 +7,7 @@ use Doctrine\Bundle\DoctrineBundle\Attribute\AsEntityListener;
 use Doctrine\ORM\Event\PrePersistEventArgs;
 use Doctrine\ORM\Events;
 
-#[AsEntityListener(event: Events::prePersist, method: 'prePersist', entity: User::class)]
+// #[AsEntityListener(event: Events::prePersist, method: 'prePersist', entity: User::class)]
 final class UserListener
 {
 

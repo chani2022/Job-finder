@@ -241,6 +241,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     #[ORM\ManyToOne(inversedBy: 'users')]
     private ?Society $society = null;
 
+    public function __construct()
+    {
+        $this->status = false;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
