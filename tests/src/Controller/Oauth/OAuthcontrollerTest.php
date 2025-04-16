@@ -25,7 +25,7 @@ class OAuthcontrollerTest extends TestCase
 
         $oauth2Client->expects($this->once())
             ->method('redirect')
-            ->with(["public_profile", 'email'], [])
+            ->with(["profile", 'email'], [])
             ->willReturn($redirectResponse);
 
         $oauthController = new OAuthController();

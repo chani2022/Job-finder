@@ -49,7 +49,6 @@ class ProfilUserProcessor implements ProcessorInterface
         }
 
         $user = $this->setProperties($user, $data);
-
         /** @var ConstraintViolationListInterface $errors */
         $errors = $this->validator->validate($user, null, ["profil:validator"]);
         if ($errors->count() > 0) {
