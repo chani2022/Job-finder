@@ -74,10 +74,12 @@ final class OAuthController extends AbstractController
         if (is_null($user_fetch)) {
             $user = new User();
             foreach ($data as $prop => $v) {
+                // if (!str_starts_with($prop, "picture")) {
                 $method = 'set' . ucfirst($prop);
                 if (method_exists($user, $method)) {
                     call_user_func([$user, $method], $v);
                 }
+                // }
             }
 
             $image_oauth = null;
@@ -121,6 +123,7 @@ final class OAuthController extends AbstractController
         $media = new MediaObject();
         $media->file = $upload;
         $user->image = $media;
+
 
         return $user;
     }

@@ -91,7 +91,7 @@ class OAuthcontrollerTest extends KernelTestCase
         $redirect_response = $oauthController->connectCheckAction($request, $clientRegistry);
 
         /** @var User $user_fetch */
-        $user_fetch = $this->em->getRepository(User::class)->findOneBy($data);
+        $user_fetch = $this->em->getRepository(User::class)->findOneBy(['email' => $data['email']]);
 
         $this->assertNotNull($user_fetch);
         $this->assertTrue($user_fetch->isStatus());
@@ -115,7 +115,8 @@ class OAuthcontrollerTest extends KernelTestCase
             "user_in_db" => [
                 "google",
                 [
-                    "email" => "admin@admin.com"
+                    "email" => "admin@admin.com",
+                    'picture' => "https://fake.image.url/test.jpg"
                 ]
 
             ],
@@ -123,9 +124,9 @@ class OAuthcontrollerTest extends KernelTestCase
                 "facebook",
                 [
                     "email" => "email@email.com",
+                    "picture_url" => "https://fake.image.url/test.jpg"
                 ]
             ]
-
         ];
     }
 
@@ -133,5 +134,7 @@ class OAuthcontrollerTest extends KernelTestCase
     {
         parent::tearDown();
         $this->em = null;
+        $this->jWTTokenManager = null;
+        $this->hasher = null;
     }
 }
