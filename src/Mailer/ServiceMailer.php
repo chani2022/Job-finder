@@ -12,11 +12,13 @@ class ServiceMailer
 {
     private MailerInterface $mailer;
     private RequestStack $requestStack;
+    private string $domaine_name_server;
 
-    public function __construct(MailerInterface $mailer, RequestStack $requestStack)
+    public function __construct(MailerInterface $mailer, RequestStack $requestStack, string $domaine_name_server)
     {
         $this->mailer = $mailer;
         $this->requestStack = $requestStack;
+        $this->domaine_name_server = $domaine_name_server;
     }
 
     public function send(User $to, string $subject): void
@@ -37,7 +39,7 @@ class ServiceMailer
             ->context([
                 'expiration_date' => new \DateTime('+7 days'),
                 'user' => $to,
-                'domaine_name' => $_ENV['DOMAINE_NAME']
+                'domaine_name' => $this->domaine_name_server
             ]);
 
         $this->mailer->send($email);
