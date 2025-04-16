@@ -6,6 +6,8 @@
 parameters:
     path_source_image_test: '%kernel.project_dir%/fixtures/'
     path_dest_images_test: '%kernel.project_dir%/public/media/'
+    domaine_name_server: '%env(DOMAINE_NAME_SERVER)%'
+    sender_mail: '%env(GMAIL_SENDER)%'
 
 services:
     # default configuration for services in *this* file
@@ -34,3 +36,11 @@ services:
     Symfony\Component\Mailer\MailerInterface:
         alias: mailer.mailer
         public: true
+
+    # Symfony\Component\DependencyInjection\ContainerInterface: '@service_container'
+
+    App\Mailer\ServiceMailer:
+        arguments: 
+            $domaine_name_server: '%domaine_name_server%'
+
+    

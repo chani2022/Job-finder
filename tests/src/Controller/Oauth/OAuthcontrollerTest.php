@@ -6,6 +6,7 @@ use App\Controller\OAuthController;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
+use Hautelook\AliceBundle\PhpUnit\ReloadDatabaseTrait;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Client\OAuth2ClientInterface;
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
@@ -91,7 +92,7 @@ class OAuthcontrollerTest extends KernelTestCase
         $redirect_response = $oauthController->connectCheckAction($request, $clientRegistry);
 
         /** @var User $user_fetch */
-        $user_fetch = $this->em->getRepository(User::class)->findOneBy($data);
+        $user_fetch = $this->em->getRepository(User::class)->findOneBy(['email' => $data['email']]);
 
         $this->assertNotNull($user_fetch);
         $this->assertTrue($user_fetch->isStatus());
@@ -115,7 +116,8 @@ class OAuthcontrollerTest extends KernelTestCase
             "user_in_db" => [
                 "google",
                 [
-                    "email" => "admin@admin.com"
+                    "email" => "admin@admin.com",
+                    'picture' => "https://fake.image.url/test.jpg"
                 ]
 
             ],
@@ -123,9 +125,9 @@ class OAuthcontrollerTest extends KernelTestCase
                 "facebook",
                 [
                     "email" => "email@email.com",
+                    "picture_url" => "https://fake.image.url/test.jpg"
                 ]
             ]
-
         ];
     }
 
@@ -133,5 +135,7 @@ class OAuthcontrollerTest extends KernelTestCase
     {
         parent::tearDown();
         $this->em = null;
+        $this->jWTTokenManager = null;
+        $this->hasher = null;
     }
 }
