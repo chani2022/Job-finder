@@ -27,17 +27,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Install Symfony CLI
+        run: |
+          curl -sS https://get.symfony.com/cli/installer | bash
+          echo "$HOME/.symfony/bin" >> $GITHUB_PATH
+
+      - name: Check Symfony version
+        run: symfony -v
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.2
           extensions: mbstring, intl, pdo_mysql
           coverage: none
-
-      - name: Install Symfony CLI
-        run: |
-          curl -sS https://get.symfony.com/cli/installer | bash
-          echo "$HOME/.symfony/bin" >> $GITHUB_PATH
 
       - name: Install dependencies
         run: |
@@ -52,7 +55,7 @@ jobs:
 
       - name: Run Symfony console check
         run: |
-          php bin/console doctrine:schema:validate
+          symfony console doctrine:schema:validate
 
       - name: Generate JWT keys for test environment
         run: |
@@ -66,4 +69,4 @@ jobs:
       - name: Run tests
         run: |
           chmod +x ./bin/phpunit
-          symfony bin/phpunit
+          symfony php bin/phpunit
