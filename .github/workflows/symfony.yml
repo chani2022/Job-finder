@@ -47,7 +47,7 @@ jobs:
 
       - name: Run Symfony console check
         run: |
-          php bin/console doctrine:schema:update
+          php bin/console doctrine:schema:update --force --env=test
           php bin/console doctrine:schema:validate
 
       - name: Run tests
