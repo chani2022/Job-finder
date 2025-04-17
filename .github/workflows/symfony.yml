@@ -14,9 +14,8 @@ jobs:
       mysql:
         image: mariadb:10.10.2
         env:
-          MARIADB_ROOT_PASSWORD: root
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: 1
           MARIADB_DATABASE: api-platform
-          DATABASE_URL: "mysql://root:root@127.0.0.1:3307/api-platform?serverVersion=10.10.2-MariaDB&charset=utf8mb4"
         ports: ['3307:3306']
         options: >-
           --health-cmd="mysqladmin ping --silent"
