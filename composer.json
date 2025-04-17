@@ -49,7 +49,7 @@
         },
         "sort-packages": true,
         "platform": {
-            "php": "8.2"
+            "php": "^8.2"
         }
     },
     "autoload": {
@@ -78,7 +78,10 @@
             "assets:install %PUBLIC_DIR%": "symfony-cmd"
         },
         "CI": {
-            "phpunit": " ./bin/phpunit"
+            "drop-db-test": "symfony console drop:database --env=test",
+            "create-db-test": "symfony console d:d:c --env=test",
+            "run-migration": "symfony console d:m:m --env=test",
+            "phpunit": "symfony bin/phpunit"
         },
         "post-install-cmd": [
             "@auto-scripts",

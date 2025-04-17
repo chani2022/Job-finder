@@ -34,6 +34,11 @@ jobs:
           extensions: mbstring, intl, pdo_mysql
           coverage: none
 
+      - name: Install Symfony CLI
+        run: |
+          curl -sS https://get.symfony.com/cli/installer | bash
+          echo "$HOME/.symfony/bin" >> $GITHUB_PATH
+
       - name: Install dependencies
         run: |
           composer install --no-progress --no-suggest
@@ -42,12 +47,11 @@ jobs:
         run: |
           cp .env.test .env.local
 
-      - name: Create test database
-        run: php bin/console doctrine:database:create --env=test          
+      # - name: Create test database
+      #   run: php bin/console doctrine:database:create --env=test          
 
       - name: Run Symfony console check
         run: |
-          php bin/console doctrine:schema:update --force --env=test
           php bin/console doctrine:schema:validate
 
       - name: Generate JWT keys for test environment
@@ -58,8 +62,8 @@ jobs:
 
       - name: Set JWT passphrase in .env.test
         run: echo "JWT_PASSPHRASE=test" >> .env.test
-        
+
       - name: Run tests
         run: |
           chmod +x ./bin/phpunit
-          ./bin/phpunit
+          symfony bin/phpunit
