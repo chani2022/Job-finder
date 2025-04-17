@@ -31,9 +31,9 @@ jobs:
         run: |
           curl -sS https://get.symfony.com/cli/installer | bash
       
-      - name: Export Path Symfony CLI
+      - name: Move Symfony CLI in bin/
         run: |
-          export PATH="$HOME/.symfony5/bin:$PATH"
+          mv /home/runner/.symfony5/bin/symfony /usr/local/bin/symfony
 
       - name: Check Symfony version
         run: symfony -v
