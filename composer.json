@@ -78,7 +78,6 @@
             "assets:install %PUBLIC_DIR%": "symfony-cmd"
         },
         "CI": {
-            "drop-db-test": "symfony console d:d:d --env=test",
             "create-db-test": "symfony console d:d:c --env=test",
             "run-migration": "symfony console d:m:m --env=test",
             "phpunit": "symfony php bin/phpunit"
