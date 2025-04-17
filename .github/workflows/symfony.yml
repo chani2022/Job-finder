@@ -24,6 +24,9 @@ jobs:
           --health-retries=3
 
     steps:
+      - name: Give execution rights to PHPUnit
+        run: chmod +x ./bin/phpunit
+        
       - name: Checkout code
         uses: actions/checkout@v3
 
