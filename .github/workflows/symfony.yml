@@ -15,8 +15,7 @@ jobs:
         image: mariadb:10.10.2
         env:
           MARIADB_ROOT_PASSWORD: root
-          MARIADB_DATABASE: app
-          MYSQL_INIT_COMMAND: "SET GLOBAL wait_timeout = 28800; SET GLOBAL max_allowed_packet = 67108864;"
+          MARIADB_DATABASE: api-platform
         ports: ['3307:3307']
         options: >-
           --health-cmd="mysqladmin ping --silent"
