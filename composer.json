@@ -78,7 +78,7 @@
             "assets:install %PUBLIC_DIR%": "symfony-cmd"
         },
         "CI": {
-            "phpunit": "symfony php bin/phpunit"
+            "phpunit": " ./bin/phpunit"
         },
         "post-install-cmd": [
             "@auto-scripts",
