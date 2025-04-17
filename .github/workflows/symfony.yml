@@ -43,10 +43,11 @@ jobs:
           cp .env.test .env.local
 
       - name: Create test database
-        run: php bin/console doctrine:database:create --env=test
+        run: php bin/console doctrine:database:create --env=test          
 
       - name: Run Symfony console check
         run: |
+          php bin/console doctrine:schema:update
           php bin/console doctrine:schema:validate
 
       - name: Run tests
