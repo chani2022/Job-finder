@@ -52,4 +52,5 @@ jobs:
 
       - name: Run tests
         run: |
+          chmod +x ./bin/phpunit
           ./bin/phpunit
