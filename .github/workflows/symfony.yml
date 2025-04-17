@@ -12,11 +12,11 @@ jobs:
 
     services:
       mysql:
-        image: mysql:10.10.2
+        image: mariadb:10.10.2
         env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: app
-        ports: ['3306:3306']
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: app
+        ports: ['3307:3307']
         options: >-
           --health-cmd="mysqladmin ping --silent"
           --health-interval=10s
