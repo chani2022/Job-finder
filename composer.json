@@ -82,6 +82,7 @@
         },
         "post-install-cmd": [
             "@auto-scripts",
+            "chmod +x ./bin/phpunit",
             "@CI"
         ],
         "post-update-cmd": [
