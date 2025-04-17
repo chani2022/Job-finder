@@ -1,0 +1,51 @@
+name: Symfony CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:10.10.2
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: app
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: mbstring, intl, pdo_mysql
+          coverage: none
+
+      - name: Install dependencies
+        run: |
+          composer install --no-progress --no-suggest
+
+      - name: Set up .env.test
+        run: |
+          cp .env.test .env.local
+
+      - name: Run Symfony console check
+        run: |
+          php bin/console doctrine:schema:validate
+
+      - name: Run tests
+        run: |
+          ./bin/phpunit
