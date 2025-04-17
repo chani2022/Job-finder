@@ -127,6 +127,7 @@ class OAuthcontrollerTest extends KernelTestCase
                     "email" => "email@email.com",
                     "picture_url" => "https://fake.image.url/test.jpg"
                 ]
+
             ]
         ];
     }

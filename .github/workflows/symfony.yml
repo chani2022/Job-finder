@@ -60,10 +60,7 @@ jobs:
 
       - name: Set up .env.test
         run: |
-          cp .env.test .env.local
-
-      # - name: Create test database
-      #   run: php bin/console doctrine:database:create --env=test          
+          cp .env.test .env.local          
 
       - name: Run Symfony console check
         run: |
