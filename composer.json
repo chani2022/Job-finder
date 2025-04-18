@@ -80,8 +80,7 @@
         "CI": {
             "drop-db-test": "symfony console d:d:d --env=test --force || echo 'Database does not exist'",
             "create-db-test": "symfony console d:d:c --env=test",
-            "sync-metadata": "symfony console  doctrine:schema:update --dump-sql --force",
-            "run-migration": "symfony console d:m:m --env=test",
+            "update-schema": "symfony console  doctrine:schema:update --dump-sql --force --env=test",
             "phpunit": "symfony php bin/phpunit"
         },
         "post-install-cmd": [
