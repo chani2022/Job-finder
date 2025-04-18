@@ -147,7 +147,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     #[ORM\GeneratedValue]
     #[
         ORM\Column,
-        Groups(["read:user:get", "read:user:collection"])
+        Groups(["read:user:get", "read:user:collection", "read:society:get", "read:society:collection"])
     ]
     private ?int $id = null;
 
@@ -164,7 +164,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
      */
     #[
         ORM\Column,
-        Groups(["read:user:get", "read:user:collection"])
+        Groups(["read:user:get", "read:user:collection", "read:society:get", "read:society:collection"])
     ]
     private array $roles = [];
 
@@ -217,7 +217,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     public ?string $confirmationPassword = null;
 
     #[
-        Groups(["read:user:get", "read:user:collection", "post:create:user"]),
+        Groups(["read:user:get", "read:user:collection", "post:create:user", "read:society:get", "read:society:collection"]),
         ORM\Column(length: 255),
         Assert\NotBlank(groups: ["post:create:validator", "profil:validator"]),
     ]
