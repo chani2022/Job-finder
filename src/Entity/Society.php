@@ -3,33 +3,56 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Post;
 use App\Repository\SocietyRepository;
+use App\State\Society\SocietyPostProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: SocietyRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ["read:society:get", "read:society:collection"]],
+    denormalizationContext: ['groups' => ['write:society']],
+    operations: [
+        new Post(
+            security: 'is_granted("ROLE_USER")',
+            denormalizationContext: ['groups' => ['write:society:post']],
+            processor: SocietyPostProcessor::class
+        )
+    ]
+)]
 class Society
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[
+        ORM\Column,
+        Groups(["read:society:get", "read:society:collection"])
+    ]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[
+        ORM\Column(length: 255),
+        Groups(["read:society:get", "read:society:collection", 'write:society:post', 'write:society'])
+    ]
     private ?string $nom_society = null;
 
     /**
      * @var Collection<int, User>
      */
-    #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'society')]
+    #[
+        ORM\OneToMany(targetEntity: User::class, mappedBy: 'society'),
+        Groups(["read:society:get", "read:society:collection"])
+    ]
     private Collection $users;
 
     public function __construct()
     {
         $this->users = new ArrayCollection();
     }
+
 
     public function getId(): ?int
     {
