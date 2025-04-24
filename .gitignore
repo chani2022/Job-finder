@@ -9,6 +9,7 @@
 /vendor/
 /public/media/*
 /public/coverage/*
+/.docker/mysql/*
 
 ###< symfony/framework-bundle ###
 
