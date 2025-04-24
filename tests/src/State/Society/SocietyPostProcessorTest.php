@@ -10,10 +10,13 @@ use App\Traits\LogUserTrait;
 use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use App\Entity\User;
+use App\Service\PaymentService;
 use Doctrine\ORM\EntityManagerInterface;
+use Hautelook\AliceBundle\PhpUnit\ReloadDatabaseTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 
 class SocietyPostProcessorTest extends KernelTestCase
 {
@@ -23,12 +26,15 @@ class SocietyPostProcessorTest extends KernelTestCase
 
     private ?Security $security;
     private ?EntityManagerInterface $em;
+    /** @var MockObject|PaymentService|null $payment */
+    private $payment;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->security = static::getContainer()->get(Security::class);
         $this->em = static::getContainer()->get(EntityManagerInterface::class);
+        $this->payment = $this->createMock(PaymentService::class);
 
         $this->loadFixturesTrait();
     }
@@ -43,7 +49,10 @@ class SocietyPostProcessorTest extends KernelTestCase
         $data->setNomSociety("test");
         $post = new Post();
 
-        $societyProcessor = new SocietyPostProcessor($this->security, $this->em);
+        $this->payment->expects($this->once())
+            ->method('prepare');
+
+        $societyProcessor = new SocietyPostProcessor($this->security, $this->em, $this->payment);
 
         $data = $societyProcessor->process($data, $post, [], []);
 

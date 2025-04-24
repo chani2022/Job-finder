@@ -44,7 +44,6 @@ class SocietyPostControllerTest extends ApiTestCase
 
         $user = static::getContainer()->get(EntityManagerInterface::class)->getRepository(User::class)->find($user->getId());
 
-
         $this->assertEquals(['ROLE_ADMIN', 'ROLE_USER'], $user->getRoles());
 
         $responseData = $response->toArray();

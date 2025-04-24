@@ -9,6 +9,10 @@ parameters:
     domaine_name_server: '%env(DOMAINE_NAME_SERVER)%'
     sender_mail: '%env(GMAIL_SENDER)%'
 
+    #stripe
+    publish_key: '%env(PUBLISHABLE_KEY)%'
+    secret_key: '%env(SECRET_KEY)%'
+
 services:
     # default configuration for services in *this* file
     _defaults:

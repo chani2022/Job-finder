@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  database:
+    container_name: mariadb
+    image: mariadb:10.10.2
+    restart: always
+    environment:
+      MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: 1
+      MARIADB_DATABASE: api-platform
+      # MARIADB_USER: symfony
+      # MARIADB_PASSWORD: secret
+      # MARIADB_ROOT_PASSWORD: secret
+
+    ports:
+      - '3307:3306'
+    volumes:
+      - mariadb-data:/var/lib/mysql
+
+  phpadmin:
+    container_name: php_admin5
+    image: bitnami/phpmyadmin:5.2.1
+    environment:
+      DATABASE_ALLOW_NO_PASSWORD: yes
+      DATABASE_HOST: database
+      # DATABASE_USER: root
+      # DATABASE_PASSWORD: secret
+    ports:
+      - '8081:8080'
+      - '8443:8443'
+    depends_on:
+      - database
+  php:
+    container_name: app
+    build:
+      context: ./.docker
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./:/var/www/offre.local
+    depends_on:
+      - database
+      - phpadmin
+    # command: bash -c "php bin/console doctrine:schema:update --force && php bin/console doctrine:schema:update --force --env=test && php bin/console h:f:l"
+    # command: bash -c "ls -la /var/www/docker.local"
+volumes:
+  mariadb-data:
