@@ -4,10 +4,12 @@ controllers:
         namespace: App\Controller
     type: attribute
 
-# config/routes.yaml
 api_login_check:
     path: /api/login_check
 
 graphql_playground:
   path: /docs/graphql
   controller: api_platform.graphql.action.graphql_playground
+
+payum_all:
+    resource: "@PayumBundle/Resources/config/routing/all.xml"

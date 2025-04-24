@@ -31,15 +31,15 @@ class SocietyRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    public function getOneWithCollection(int $id_society): ?Society
-    {
-        return $this->createQueryBuilder('s')
-            ->join("s.users", "us")
-            ->addSelect("us")
-            ->where('s.id = :val')
-            ->setParameter('val', $id_society)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
+    // public function getOneWithCollection(int $id_society): ?Society
+    // {
+    //     return $this->createQueryBuilder('s')
+    //         ->join("s.users", "us")
+    //         ->addSelect("us")
+    //         ->where('s.id = :val')
+    //         ->setParameter('val', $id_society)
+    //         ->getQuery()
+    //         ->getOneOrNullResult()
+    //     ;
+    // }
 }
