@@ -91,6 +91,14 @@ jobs:
         run: |
           docker exec $(docker ps -qf "name=app") composer install
 
+      - name: 📦 Run migration
+        run: |
+          docker exec $(docker ps -qf "name=app") php bin/console d:m:m --no-iteraction
+
+      - name: 📦 Run migration environement test
+        run: |
+          docker exec $(docker ps -qf "name=app") php bin/console doctrine:schema:update --force --env=test
+
       - name: 🧪 Run tests inside container
         run: |
           docker exec $(docker ps -qf "name=app") php bin/phpunit
