@@ -87,6 +87,10 @@ jobs:
           docker-compose up -d
           sleep 10  # (laisse le temps aux containers de démarrer)
 
+      - name: 📦 Composer install
+        run: |
+          docker exec $(docker ps -qf "name=app") composer install
+
       - name: 🧪 Run tests inside container
         run: |
           docker exec $(docker ps -qf "name=app") php bin/phpunit
