@@ -111,7 +111,6 @@ jobs:
       - name: Create database for .env.local and .env.test
         run: |
           docker exec $(docker ps -qf "name=app") php bin/console d:d:c
-          docker exec $(docker ps -qf "name=app") php bin/console d:d:c --env=test
 
       - name: Run migration .env.local and .env.test
         run: |
