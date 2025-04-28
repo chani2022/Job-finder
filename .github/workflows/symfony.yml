@@ -112,11 +112,9 @@ jobs:
         run: |
           docker exec $(docker ps -qf "name=app") php bin/console d:d:c
 
-      - name: Run migration .env.local and .env.test
+      - name: Run migration .env.test
         run: |
-          docker exec $(docker ps -qf "name=app") php bin/console d:m:m
-          docker exec $(docker ps -qf "name=app") php bin/console doctrine:schema:update --force --env=test
-          docker exec $(docker ps -qf "name=app") php bin/console doctrine:schema:validate
+          docker exec $(docker ps -qf "name=app") php bin/console doctrine:schema:update --force
 
       - name: Check schema doctrine
         run: |
