@@ -114,7 +114,7 @@ jobs:
 
       - name: Run migration .env.local and .env.test
         run: |
-          docker exec $(docker ps -qf "name=app") php bin/console d:m:m --no-iteraction
+          docker exec $(docker ps -qf "name=app") php bin/console d:m:m
           docker exec $(docker ps -qf "name=app") php bin/console doctrine:schema:update --force --env=test
           docker exec $(docker ps -qf "name=app") php bin/console doctrine:schema:validate
 
