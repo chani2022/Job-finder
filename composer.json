@@ -84,25 +84,11 @@
             "cache:clear": "symfony-cmd",
             "assets:install %PUBLIC_DIR%": "symfony-cmd"
         },
-        "CI": {
-            "drop-db-test": "symfony console d:d:d --env=test --force || echo 'Database does not exist'",
-            "create-db-test": "symfony console d:d:c --env=test",
-            "update-schema-db-test": "symfony console doctrine:schema:update --force --env=test",
-            "copy .env.test to .env.local": "cp .env.test .env.local",
-            "run migration": "symfony console d:s:u --force",
-            "check migration": "symfony console doctrine:schema:validate",
-            "phpunit": "symfony php bin/phpunit"
-        },
         "post-install-cmd": [
-            "@auto-scripts",
-            "cp .env.test .env.local",
-            "chmod +x ./bin/phpunit",
-            "@CI"
+            "@auto-scripts"
         ],
         "post-update-cmd": [
-            "@auto-scripts",
-            "chmod +x ./bin/phpunit",
-            "@CI"
+            "@auto-scripts"
         ]
     },
     "conflict": {
