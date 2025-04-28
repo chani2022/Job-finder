@@ -21,7 +21,7 @@ services:
     container_name: php_admin5
     image: bitnami/phpmyadmin:5.2.1
     environment:
-      DATABASE_ALLOW_NO_PASSWORD: yes
+      DATABASE_ALLOW_NO_PASSWORD: "yes"
       DATABASE_HOST: database
       # DATABASE_USER: root
       # DATABASE_PASSWORD: secret
