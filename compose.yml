@@ -44,5 +44,6 @@ services:
       - phpadmin
     # command: bash -c "php bin/console doctrine:schema:update --force && php bin/console doctrine:schema:update --force --env=test && php bin/console h:f:l"
     # command: bash -c "ls -la /var/www/docker.local"
+
 volumes:
   mariadb-data:

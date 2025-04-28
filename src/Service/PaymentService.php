@@ -6,6 +6,7 @@ use App\Entity\Payment;
 use Payum\Core\Payum;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use App\Entity\User;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class PaymentService
@@ -19,7 +20,7 @@ class PaymentService
         $this->tokenStorage = $tokenStorage;
     }
 
-    public function prepare()
+    public function prepare(): Response
     {
         /** @var User $user */
         $user = $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
