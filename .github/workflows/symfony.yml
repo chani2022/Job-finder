@@ -10,69 +10,7 @@ jobs:
   tests:
     runs-on: ubuntu-latest
 
-    
-    # services:
-    #   mysql:
-    #     image: mariadb:10.10.2
-    #     env:
-    #       MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: 1
-    #       MARIADB_DATABASE: api-platform
-    #     ports: ['3307:3306']
-    #     options: >-
-    #       --health-cmd="mysqladmin ping --silent"
-    #       --health-interval=10s
-    #       --health-timeout=5s
-    #       --health-retries=3
-
     steps:
-      # - name: Checkout code
-      #   uses: actions/checkout@v3
-        
-
-      # - name: Install Symfony CLI
-      #   run: |
-      #     curl -sS https://get.symfony.com/cli/installer | bash
-      
-      # - name: Move Symfony CLI in bin/
-      #   run: |
-      #     mv /home/runner/.symfony5/bin/symfony /usr/local/bin/symfony
-
-      # - name: Check Symfony version
-      #   run: symfony -v
-
-      # - name: Setup PHP
-      #   uses: shivammathur/setup-php@v2
-      #   with:
-      #     php-version: 8.2
-      #     extensions: mbstring, intl, pdo_mysql
-      #     coverage: none
-
-      # - name: Generate JWT keys for test environment
-      #   run: |
-      #     mkdir -p config/jwt
-      #     openssl genrsa -out config/jwt/private.pem -aes256 -passout pass:test 4096
-      #     openssl rsa -pubout -in config/jwt/private.pem -passin pass:test -out config/jwt/public.pem
-
-      # - name: Set JWT passphrase in .env.test
-      #   run: echo "JWT_PASSPHRASE=test" >> .env.test
-
-      # - name: Install dependencies
-      #   run: |
-      #     composer install --no-progress --no-suggest
-
-      # - name: Set up .env.test
-      #   run: |
-      #     cp .env.test .env.local          
-
-      # - name: Run Symfony console check
-      #   run: |
-      #     symfony console doctrine:schema:update --force  
-      #     symfony console doctrine:schema:validate
-
-      # - name: Run tests
-      #   run: |
-      #     chmod +x ./bin/phpunit
-      #     symfony php bin/phpunit
       - name: 📥 Checkout repo
         uses: actions/checkout@v4
 
@@ -100,15 +38,11 @@ jobs:
       - name: Set JWT passphrase in .env.test
         run: docker exec $(docker ps -qf "name=app") echo "JWT_PASSPHRASE=test" >> .env.test
 
-      # - name: Install dependencies
-      #   run: |
-      #     composer install --no-progress --no-suggest
-
       - name: Set up .env.test
         run: |
           docker exec $(docker ps -qf "name=app") cp .env.test .env.local
 
-      - name: Create database for .env.local and .env.test
+      - name: Create database for .env.test
         run: |
           docker exec $(docker ps -qf "name=app") php bin/console d:d:c
 
@@ -119,14 +53,6 @@ jobs:
       - name: Check schema doctrine
         run: |
           docker exec $(docker ps -qf "name=app") php bin/console doctrine:schema:validate
-
-      # - name: 📦 Run migration
-      #   run: |
-      #     docker exec $(docker ps -qf "name=app") php bin/console d:m:m --no-iteraction
-
-      # - name: 📦 Run migration environement test
-      #   run: |
-      #     docker exec $(docker ps -qf "name=app") php bin/console doctrine:schema:update --force --env=test
 
       - name: 🧪 Run tests inside container
         run: |
