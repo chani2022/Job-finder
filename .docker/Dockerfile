@@ -18,8 +18,8 @@ RUN apt-get update && apt-get install -y \
     zip \
     && docker-php-ext-install pdo pdo_mysql zip
 
-RUN curl -sS https://get.symfony.com/cli/installer | bash
-RUN mv /root/.symfony5/bin/symfony /usr/local/bin/symfony
+# RUN curl -sS https://get.symfony.com/cli/installer | bash
+# RUN mv /root/.symfony5/bin/symfony /usr/local/bin/symfony
 RUN git config --global user.email "chani@test.com" \ 
     && git config --global user.name "chani"
 

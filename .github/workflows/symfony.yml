@@ -106,13 +106,22 @@ jobs:
 
       - name: Set up .env.test
         run: |
-          docker exec $(docker ps -qf "name=app") cp .env.test .env.local          
+          docker exec $(docker ps -qf "name=app") cp .env.test .env.local
 
-      - name: Run Symfony console check and run migration
+      - name: Create database for .env.local and .env.test
         run: |
-          docker exec $(docker ps -qf "name=app") symfony console doctrine:schema:update --force 
-          docker exec $(docker ps -qf "name=app") symfony console doctrine:schema:update --force  --env=test
-          docker exec $(docker ps -qf "name=app") symfony console doctrine:schema:validate
+          docker exec $(docker ps -qf "name=app") php bin/console d:d:c
+          docker exec $(docker ps -qf "name=app") php bin/console d:d:c --env=test
+
+      - name: Run migration .env.local and .env.test
+        run: |
+          docker exec $(docker ps -qf "name=app") php bin/console d:m:m --no-iteraction
+          docker exec $(docker ps -qf "name=app") php bin/console doctrine:schema:update --force --env=test
+          docker exec $(docker ps -qf "name=app") php bin/console doctrine:schema:validate
+
+      - name: Check schema doctrine
+        run: |
+          docker exec $(docker ps -qf "name=app") php bin/console doctrine:schema:validate
 
       # - name: 📦 Run migration
       #   run: |
