@@ -110,7 +110,8 @@ jobs:
 
       - name: Run Symfony console check and run migration
         run: |
-          docker exec $(docker ps -qf "name=app") symfony console doctrine:schema:update --force  
+          docker exec $(docker ps -qf "name=app") symfony console doctrine:schema:update --force 
+          docker exec $(docker ps -qf "name=app") symfony console doctrine:schema:update --force  --env=test
           docker exec $(docker ps -qf "name=app") symfony console doctrine:schema:validate
 
       # - name: 📦 Run migration
