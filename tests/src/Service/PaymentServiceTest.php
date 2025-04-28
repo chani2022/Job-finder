@@ -7,13 +7,19 @@ use App\Service\PaymentService;
 use App\Traits\FixturesTrait;
 use App\Traits\LogUserTrait;
 use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
+use Payum\Core\GatewayInterface;
 use Payum\Core\Payum;
+use Payum\Core\Reply\ReplyInterface;
+use Payum\Core\Request\GetHumanStatus;
 use Payum\Core\Security\GenericTokenFactory;
+use Payum\Core\Security\HttpRequestVerifierInterface;
 use Payum\Core\Security\TokenInterface as PayumTokenInterface;
 use Payum\Core\Storage\StorageInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
@@ -105,6 +111,60 @@ class PaymentServiceTest extends KernelTestCase
         $this->assertEquals($this->user_1->getEmail(), $payment->getClientEmail());
         $this->assertEquals("EUR", $payment->getCurrencyCode());
         $this->assertEquals(123, $payment->getTotalAmount());
+    }
+
+    public function testPayementDone(): void
+    {
+
+        // Arrange
+        $requestVerifier = $this->createMock(HttpRequestVerifierInterface::class);
+        $token = $this->createMock(PayumTokenInterface::class);
+        $gateway = $this->createMock(GatewayInterface::class);
+        $paymentModel = new Payment(); // Remplace stdClass par ta classe Payment si tu en as une
+
+        $request = new Request();
+
+        // Simuler le HttpRequestVerifier
+        $this->payum->method('getHttpRequestVerifier')
+            ->willReturn($requestVerifier);
+
+        $requestVerifier->method('verify')
+            ->with($request)
+            ->willReturn($token);
+
+        // Simuler le token
+        $token->method('getGatewayName')
+            ->willReturn('gateway_name');
+
+        // Simuler la récupération du gateway
+        $this->payum->method('getGateway')
+            ->with('gateway_name')
+            ->willReturn($gateway);
+
+        $paymentModel->setTotalAmount(5000);
+        $paymentModel->setCurrencyCode('EUR');
+        $paymentModel->setDetails(['foo' => 'bar']);
+
+        // Simuler l'exécution du status
+        $gateway->expects($this->once())
+            ->method('execute')
+            ->willReturnCallback(function ($status) use ($paymentModel) {
+                if ($status instanceof GetHumanStatus) {
+                    $status->markCaptured();
+                    $status->setModel($paymentModel);
+                }
+            });
+
+
+        $response = $this->paymentService->payementDone($request);
+
+        $data = json_decode($response->getContent(), true);
+        // Assert
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals('captured', $data['status']);
+        $this->assertEquals(5000, $data['payment']['total_amount']);
+        $this->assertEquals('EUR', $data['payment']['currency_code']);
+        $this->assertEquals(['foo' => 'bar'], $data['payment']['details']);
     }
 
     protected function tearDown(): void

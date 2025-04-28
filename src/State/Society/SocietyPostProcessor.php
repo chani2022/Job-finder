@@ -30,7 +30,6 @@ class SocietyPostProcessor implements ProcessorInterface
         $user = $this->security->getUser();
 
         $this->payment->prepare();
-
         /** @var User $user */
         $user = $this->em->getRepository(User::class)->find($user->getId());
         $user->setRoles(['ROLE_ADMIN'])
