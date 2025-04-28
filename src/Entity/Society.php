@@ -9,6 +9,7 @@ use App\State\Society\SocietyPostProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: SocietyRepository::class)]
@@ -19,10 +20,13 @@ use Symfony\Component\Serializer\Attribute\Groups;
         new Post(
             security: 'is_granted("ROLE_USER")',
             denormalizationContext: ['groups' => ['write:society:post']],
+            validationContext: ['groups' => ['post:society:validator']],
             processor: SocietyPostProcessor::class
         )
     ]
 )]
+#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['nom_society'])]
+#[UniqueEntity(fields: ["nom_society"], groups: ["post:society:validator"])]
 class Society
 {
     #[ORM\Id]
