@@ -95,6 +95,7 @@
         },
         "post-install-cmd": [
             "@auto-scripts",
+            "cp .env.test .env.local",
             "chmod +x ./bin/phpunit",
             "@CI"
         ],
