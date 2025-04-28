@@ -87,17 +87,39 @@ jobs:
           docker-compose up -d
           sleep 10  # (laisse le temps aux containers de démarrer)
 
-      - name: 📦 Composer install
+      - name: 📦 Install dependencies
         run: |
-          docker exec $(docker ps -qf "name=app") composer install
+          docker exec $(docker ps -qf "name=app") composer install --no-progress --no-suggest
 
-      - name: 📦 Run migration
+      - name: Generate JWT keys for test environment
         run: |
-          docker exec $(docker ps -qf "name=app") php bin/console d:m:m --no-iteraction
+          docker exec $(docker ps -qf "name=app") mkdir -p config/jwt
+          docker exec $(docker ps -qf "name=app") openssl genrsa -out config/jwt/private.pem -aes256 -passout pass:test 4096
+          docker exec $(docker ps -qf "name=app") openssl rsa -pubout -in config/jwt/private.pem -passin pass:test -out config/jwt/public.pem
 
-      - name: 📦 Run migration environement test
+      - name: Set JWT passphrase in .env.test
+        run: docker exec $(docker ps -qf "name=app") echo "JWT_PASSPHRASE=test" >> .env.test
+
+      # - name: Install dependencies
+      #   run: |
+      #     composer install --no-progress --no-suggest
+
+      - name: Set up .env.test
         run: |
-          docker exec $(docker ps -qf "name=app") php bin/console doctrine:schema:update --force --env=test
+          docker exec $(docker ps -qf "name=app") cp .env.test .env.local          
+
+      - name: Run Symfony console check and run migration
+        run: |
+          docker exec $(docker ps -qf "name=app") symfony console doctrine:schema:update --force  
+          docker exec $(docker ps -qf "name=app") symfony console doctrine:schema:validate
+
+      # - name: 📦 Run migration
+      #   run: |
+      #     docker exec $(docker ps -qf "name=app") php bin/console d:m:m --no-iteraction
+
+      # - name: 📦 Run migration environement test
+      #   run: |
+      #     docker exec $(docker ps -qf "name=app") php bin/console doctrine:schema:update --force --env=test
 
       - name: 🧪 Run tests inside container
         run: |
