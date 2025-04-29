@@ -49,8 +49,11 @@ class PaymentService
             $payment,
             'payum_payment_done' // the route to redirect after capture
         );
-
-        return new RedirectResponse($captureToken->getTargetUrl());
+        // dd(new RedirectResponse($captureToken->getTargetUrl()));
+        // return new RedirectResponse($captureToken->getTargetUrl());
+        return new JsonResponse([
+            "url_payment" => $captureToken->getTargetUrl()
+        ]);
     }
 
     public function payementDone(Request $request): Response

@@ -66,8 +66,21 @@ class SocietyPostControllerTest extends ApiTestCase
         $this->assertTrue($found, 'L\'utilisateur attendu n\'a pas été trouvé dans la collection "users".');
     }
 
+    public function testUnauthorizedCreateSociety(): void
+    {
+        $this->client->request("POST", "/api/societies", [
+            "json" => [
+                "nom_society" => 'test'
+            ]
+        ]);
+
+        $this->assertResponseStatusCodeSame(401);
+    }
+
     protected function tearDown(): void
     {
         parent::tearDown();
+        $this->client = null;
+        $this->security = null;
     }
 }

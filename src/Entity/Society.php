@@ -52,9 +52,13 @@ class Society
     ]
     private Collection $users;
 
+    #[ORM\Column(options: ['defaults' => false])]
+    private ?bool $status = null;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
+        $this->status = false;
     }
 
 
@@ -101,6 +105,18 @@ class Society
                 $user->setSociety(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isStatus(): ?bool
+    {
+        return $this->status;
+    }
+
+    public function setStatus(bool $status): static
+    {
+        $this->status = $status;
 
         return $this;
     }
