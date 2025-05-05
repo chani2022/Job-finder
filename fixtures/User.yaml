@@ -22,3 +22,10 @@ App\Entity\User:
         email: disabled@test.com
         username: disabled
         password: <hashPassword('test')>
+
+    user_activate_society:
+        email: activate@admin.com
+        username: activate
+        password: <hashPassword('test')>
+        # society: '@unique_society'
+        status: true

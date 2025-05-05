@@ -1,0 +1,15 @@
+payum:
+    # storages:
+    #     App\Entity\Payment: { doctrine: orm }
+
+    # security:
+    #     token_storage:
+    #         App\Entity\Token: { doctrine: orm }
+
+    gateways:
+        default:
+            factory: offline
+        # stripe:
+        #     factory: stripe_checkout
+        #     publishable_key: '%publish_key%'
+        #     secret_key: '%secret_key%'

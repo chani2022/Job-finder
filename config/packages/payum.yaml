@@ -7,9 +7,9 @@ payum:
             App\Entity\Token: { doctrine: orm }
 
     gateways:
-        offline:
-            factory: offline
-        stripe:
+        # offline:
+        #     factory: offline
+        default:
             factory: stripe_checkout
             publishable_key: '%publish_key%'
             secret_key: '%secret_key%'

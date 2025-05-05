@@ -12,10 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use App\Entity\User;
 use App\Service\PaymentService;
 use Doctrine\ORM\EntityManagerInterface;
-use Hautelook\AliceBundle\PhpUnit\ReloadDatabaseTrait;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\Serializer\Serializer;
-use Symfony\Component\Serializer\SerializerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 
 class SocietyPostProcessorTest extends KernelTestCase
@@ -39,7 +36,7 @@ class SocietyPostProcessorTest extends KernelTestCase
         $this->loadFixturesTrait();
     }
 
-    public function testSocietyProcessor(): void
+    public function testSocietyPostProcessor(): void
     {
         /** @var User $user */
         $user = $this->all_fixtures['user_1'];
@@ -47,25 +44,23 @@ class SocietyPostProcessorTest extends KernelTestCase
 
         $data = new Society();
         $data->setNomSociety("test");
+
         $post = new Post();
 
-        $this->payment->expects($this->once())
-            ->method('prepare');
+        $societyProcessor = new SocietyPostProcessor($this->security, $this->em);
 
-        $societyProcessor = new SocietyPostProcessor($this->security, $this->em, $this->payment);
+        /**  @var Society $society */
+        $society = $societyProcessor->process($data, $post, [], []);
 
-        $data = $societyProcessor->process($data, $post, [], []);
+        /** @var Society $data_bdd */
+        $data_bdd = $this->em->getRepository(Society::class)->findOneBy([
+            "nom_society" => $data->getNomSociety()
+        ]);
+        //assert data in bdd
+        $this->assertEquals($data_bdd->getId(), $society->getId());
+        $this->assertFalse($data_bdd->isStatus(), $society->isStatus());
 
-        /** @var Serializer $serializer */
-        $serializer = static::getContainer()->get(SerializerInterface::class);
-        $json = $serializer->serialize($data, 'json');
-        $responseData = json_decode($json, true);
-
-        // $responseData = $response->toArray();
-
-        $this->assertArrayHasKey('users', $responseData);
-        $this->assertIsArray($responseData['users']);
-        $this->assertEquals("TEST", $responseData['nom_society']);
+        $this->assertCount(1, $data->getUsers());
     }
 
     protected function tearDown(): void

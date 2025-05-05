@@ -3,3 +3,7 @@ App\Entity\Society:
         nom_society: <name()>
     adm:
         nom_society: "adm"
+
+    unique_society:
+        nom_society: "unique"
+        users: ["@user_activate_society"]
