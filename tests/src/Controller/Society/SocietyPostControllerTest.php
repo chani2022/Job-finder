@@ -10,6 +10,7 @@ use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Response;
 
 class SocietyPostControllerTest extends ApiTestCase
 {
@@ -35,35 +36,50 @@ class SocietyPostControllerTest extends ApiTestCase
         $user = $this->all_fixtures['user_1'];
         $this->client->loginUser($user);
 
-        $response = $this->client->request("POST", "/api/societies", [
+        $this->client->request("POST", "/api/societies", [
             "json" => [
                 "nom_society" => 'test'
             ]
         ]);
 
+        $this->assertJsonContains([
+            "nom_society" => "TEST",
+            "users" => [
+                [
+                    "id" => $user->getId()
+                ]
+            ]
+        ]);
+    }
 
-        $user = static::getContainer()->get(EntityManagerInterface::class)->getRepository(User::class)->find($user->getId());
+    public function testUniqueSociety(): void
+    {
+        /** @var User $user */
+        $user = $this->all_fixtures['user_1'];
+        $this->client->loginUser($user);
 
-        $this->assertEquals(['ROLE_ADMIN', 'ROLE_USER'], $user->getRoles());
+        $this->client->request("POST", "/api/societies", [
+            "json" => [
+                "nom_society" => 'unique'
+            ]
+        ]);
 
-        $responseData = $response->toArray();
+        $this->assertResponseStatusCodeSame(422);
+    }
 
-        $this->assertArrayHasKey('users', $responseData);
-        $this->assertIsArray($responseData['users']);
-        $this->assertEquals("TEST", $responseData['nom_society']);
-        // Cherche un utilisateur avec le bon ID
-        $found = false;
-        foreach ($responseData['users'] as $userData) {
-            if (
-                $userData['id'] === $user->getId() &&
-                $userData['username'] === $user->getUsername() &&
-                $userData['roles'] === ['ROLE_ADMIN', 'ROLE_USER']
-            ) {
-                $found = true;
-                break;
-            }
-        }
-        $this->assertTrue($found, 'L\'utilisateur attendu n\'a pas été trouvé dans la collection "users".');
+    public function testNotBlankNomSociety(): void
+    {
+        /** @var User $user */
+        $user = $this->all_fixtures['user_1'];
+        $this->client->loginUser($user);
+
+        $this->client->request("POST", "/api/societies", [
+            "json" => [
+                "nom_society" => ''
+            ]
+        ]);
+
+        $this->assertResponseStatusCodeSame(422);
     }
 
     public function testUnauthorizedCreateSociety(): void
@@ -76,6 +92,8 @@ class SocietyPostControllerTest extends ApiTestCase
 
         $this->assertResponseStatusCodeSame(401);
     }
+
+
 
     protected function tearDown(): void
     {

@@ -12,6 +12,9 @@ parameters:
     #stripe
     publish_key: '%env(PUBLISHABLE_KEY)%'
     secret_key: '%env(SECRET_KEY)%'
+    webhook_secret_key: '%env(STRIPE_WEBHOOK_SECRET)%'
+
+    redirect_url_front: '%env(REDIRECT_URL_FRONT)%'
 
 services:
     # default configuration for services in *this* file
@@ -41,10 +44,18 @@ services:
         alias: mailer.mailer
         public: true
 
-    # Symfony\Component\DependencyInjection\ContainerInterface: '@service_container'
-
     App\Mailer\ServiceMailer:
         arguments: 
             $domaine_name_server: '%domaine_name_server%'
+
+
+    App\Controller\Payum\PaymentController:
+        arguments:
+            $redirect_url_front: '%redirect_url_front%'
+
+    App\Controller\OAuthController:
+        arguments:
+            $redirect_url_front: '%redirect_url_front%'
+
 
     

@@ -3,7 +3,10 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Put;
 use App\Repository\SocietyRepository;
 use App\State\Society\SocietyPostProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -11,6 +14,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: SocietyRepository::class)]
 #[ApiResource(
@@ -22,7 +26,8 @@ use Symfony\Component\Serializer\Attribute\Groups;
             denormalizationContext: ['groups' => ['write:society:post']],
             validationContext: ['groups' => ['post:society:validator']],
             processor: SocietyPostProcessor::class
-        )
+        ),
+        // new GetCollection()
     ]
 )]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['nom_society'])]
@@ -39,7 +44,8 @@ class Society
 
     #[
         ORM\Column(length: 255),
-        Groups(["read:society:get", "read:society:collection", 'write:society:post', 'write:society'])
+        Groups(["read:society:get", "read:society:collection", 'write:society:post', 'write:society']),
+        Assert\NotBlank(['groups' => ['post:society:validator']])
     ]
     private ?string $nom_society = null;
 
@@ -47,7 +53,7 @@ class Society
      * @var Collection<int, User>
      */
     #[
-        ORM\OneToMany(targetEntity: User::class, mappedBy: 'society'),
+        ORM\OneToMany(targetEntity: User::class, mappedBy: 'society', cascade: ['persist', 'remove']),
         Groups(["read:society:get", "read:society:collection"])
     ]
     private Collection $users;

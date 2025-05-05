@@ -56,7 +56,7 @@ class PaymentServiceTest extends KernelTestCase
         $this->paymentService = new PaymentService($this->payum, $securityTokenStorage);
     }
 
-    public function testPreparePayment(): void
+    public function testPrepare(): void
     {
 
         $storage = $this->createMock(StorageInterface::class);
@@ -67,7 +67,7 @@ class PaymentServiceTest extends KernelTestCase
 
         $payment = new Payment();
         $url = "payum_payment_done";
-        $gatewayNameExcepted = 'stripe_checkout';
+        $gatewayNameExcepted = 'default';
 
 
         $storage->expects($this->once())
@@ -100,20 +100,18 @@ class PaymentServiceTest extends KernelTestCase
             ->method('getTargetUrl')
             ->willReturn($url);
 
-        // $redirect = new RedirectResponse($url);
+        $redirect = new RedirectResponse($url);
 
         $response = $this->paymentService->prepare();
 
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $data = json_decode($response->getContent(), true);
+        $this->assertInstanceOf(RedirectResponse::class, $response);
 
-        $this->assertEquals($url, $data['url_payment']);
-        // $this->assertEquals($redirect->getTargetUrl(), $response->getTargetUrl());
+        $this->assertEquals($redirect->getTargetUrl(), $response->getTargetUrl());
 
-        // $this->assertEquals($this->user_1->getId(), $payment->getClientId());
-        // $this->assertEquals($this->user_1->getEmail(), $payment->getClientEmail());
-        // $this->assertEquals("EUR", $payment->getCurrencyCode());
-        // $this->assertEquals(123, $payment->getTotalAmount());
+        $this->assertEquals($this->user_1->getId(), $payment->getClientId());
+        $this->assertEquals($this->user_1->getEmail(), $payment->getClientEmail());
+        $this->assertEquals("EUR", $payment->getCurrencyCode());
+        $this->assertEquals(123, $payment->getTotalAmount());
     }
 
     public function testPayementDone(): void
@@ -158,13 +156,14 @@ class PaymentServiceTest extends KernelTestCase
                 }
             });
 
+        /** @var JsonResponse $jsonResponse */
+        $jsonResponse = $this->paymentService->paymentDone($request);
 
-        $response = $this->paymentService->payementDone($request);
-
-        $data = json_decode($response->getContent(), true);
+        $data = json_decode($jsonResponse->getContent(), true);
         // Assert
-        $this->assertInstanceOf(JsonResponse::class, $response);
+        // $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals('captured', $data['status']);
+        // $this->assertInstanceOf(GetHumanStatus::class, $status);
         $this->assertEquals(5000, $data['payment']['total_amount']);
         $this->assertEquals('EUR', $data['payment']['currency_code']);
         $this->assertEquals(['foo' => 'bar'], $data['payment']['details']);

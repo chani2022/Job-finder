@@ -21,15 +21,19 @@ final class OAuthController extends AbstractController
     private EntityManagerInterface $em;
     private JWTTokenManagerInterface $jWTTokenManager;
     private UserPasswordHasherInterface $hasher;
-    public function __construct(EntityManagerInterface $em, JWTTokenManagerInterface $jWTTokenManager, UserPasswordHasherInterface $hasher)
+    private string $redirect_url_front;
+
+    public function __construct(EntityManagerInterface $em, JWTTokenManagerInterface $jWTTokenManager, UserPasswordHasherInterface $hasher, string $redirect_url_front)
     {
         $this->em = $em;
         $this->jWTTokenManager = $jWTTokenManager;
         $this->hasher = $hasher;
+        $this->redirect_url_front = $redirect_url_front;
     }
     #[Route('/connect/{oauth}', name: 'connect_oauth_start')]
-    public function connectAction(string $oauth, ClientRegistry $clientRegistry): Response
+    public function connectAction(string $oauth, ClientRegistry $clientRegistry): RedirectResponse
     {
+
         $scope = [
             'profile',
             'email' // the scopes you want to access
@@ -67,8 +71,10 @@ final class OAuthController extends AbstractController
         /** @var \League\OAuth2\Client\Provider\FacebookUser $user */
         $user_social = $client->fetchUser();
         $data = $user_social->toArray();
+        // propriete par defaut
         $plain_password = "offre";
         $username = "username";
+
         /** @var User $user_fetch */
         $user_fetch = $this->em->getRepository(User::class)->findOneBy(["email" => $data['email']]);
         if (is_null($user_fetch)) {
@@ -106,7 +112,7 @@ final class OAuthController extends AbstractController
 
         $token = $this->jWTTokenManager->create($user_fetch ?? $user);
 
-        $url_redirect_front = $_ENV['REDIRECT_URL_FRONT'] . "/login?token=$token";
+        $url_redirect_front = $this->redirect_url_front . "/login?token=$token";
         if (is_null($user_fetch)) {
             $url_redirect_front .= "&plain-password=" . $plain_password . "&username=" . $username;
         }
