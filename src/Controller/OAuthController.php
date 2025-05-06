@@ -12,7 +12,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -23,6 +22,8 @@ final class OAuthController extends AbstractController
     private UserPasswordHasherInterface $hasher;
     private string $redirect_url_front;
 
+    public const DEFAULT_PLAIN_PASSWORD = "offre";
+
     public function __construct(EntityManagerInterface $em, JWTTokenManagerInterface $jWTTokenManager, UserPasswordHasherInterface $hasher, string $redirect_url_front)
     {
         $this->em = $em;
@@ -30,6 +31,7 @@ final class OAuthController extends AbstractController
         $this->hasher = $hasher;
         $this->redirect_url_front = $redirect_url_front;
     }
+
     #[Route('/connect/{oauth}', name: 'connect_oauth_start')]
     public function connectAction(string $oauth, ClientRegistry $clientRegistry): RedirectResponse
     {
@@ -71,21 +73,26 @@ final class OAuthController extends AbstractController
         /** @var \League\OAuth2\Client\Provider\FacebookUser $user */
         $user_social = $client->fetchUser();
         $data = $user_social->toArray();
-        // propriete par defaut
-        $plain_password = "offre";
-        $username = "username";
 
         /** @var User $user_fetch */
         $user_fetch = $this->em->getRepository(User::class)->findOneBy(["email" => $data['email']]);
+        $user_found = true;
         if (is_null($user_fetch)) {
-            $user = new User();
+            $user_found = false;
+            // default value si utilisateur n'est pas encore membre
+            // $plain_password = "offre";
+            $user_fetch = (new User())
+                ->setPassword(
+                    $this->hasher->hashPassword(new User(), static::DEFAULT_PLAIN_PASSWORD)
+                )
+                ->setStatus(true)
+                ->setUsername($data['email']);
+
             foreach ($data as $prop => $v) {
-                // if (!str_starts_with($prop, "picture")) {
                 $method = 'set' . ucfirst($prop);
-                if (method_exists($user, $method)) {
-                    call_user_func([$user, $method], $v);
+                if (method_exists($user_fetch, $method)) {
+                    call_user_func([$user_fetch, $method], $v);
                 }
-                // }
             }
 
             $image_oauth = null;
@@ -99,22 +106,22 @@ final class OAuthController extends AbstractController
                     break;
             }
 
-            $this->uploadFile($user, $image_oauth)
-                ->setPassword(
-                    $this->hasher->hashPassword($user, $plain_password)
-                )
-                ->setStatus(true)
-                ->setUsername($username);
+            $this->uploadFile($user_fetch, $image_oauth);
+            // ->setPassword(
+            //     $this->hasher->hashPassword($user, $plain_password)
+            // )
+            // ->setStatus(true)
+            // ->setUsername($username);
 
-            $this->em->persist($user);
+            $this->em->persist($user_fetch);
             $this->em->flush();
         }
 
-        $token = $this->jWTTokenManager->create($user_fetch ?? $user);
+        $token = $this->jWTTokenManager->create($user_fetch);
 
         $url_redirect_front = $this->redirect_url_front . "/login?token=$token";
-        if (is_null($user_fetch)) {
-            $url_redirect_front .= "&plain-password=" . $plain_password . "&username=" . $username;
+        if (!$user_found) {
+            $url_redirect_front .= "&plain-password=" . static::DEFAULT_PLAIN_PASSWORD . "&username=" . $user_fetch->getEmail();
         }
 
         /** rediriger vers le front */
