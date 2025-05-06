@@ -120,7 +120,10 @@ class OAuthcontrollerTest extends KernelTestCase
         if ($oauth == "facebook") {
             $this->assertStringContainsString("token=", $redirect_response->getTargetUrl());
             $this->assertStringContainsString("plain-password=", $redirect_response->getTargetUrl());
-            $this->assertStringContainsString("username=", $redirect_response->getTargetUrl());
+            $this->assertStringContainsString("username=" . $user_fetch->getEmail(), $redirect_response->getTargetUrl());
+
+            $this->assertEquals($user_fetch->getUsername(), $data['email']);
+            $this->assertTrue($this->hasher->isPasswordValid($user_fetch, OAuthController::DEFAULT_PLAIN_PASSWORD));
         } else {
             $this->assertStringContainsString("token=", $redirect_response->getTargetUrl());
             $this->assertStringNotContainsString("plain-password=", $redirect_response->getTargetUrl());
@@ -143,10 +146,10 @@ class OAuthcontrollerTest extends KernelTestCase
                 "facebook",
                 [
                     "email" => "email@email.com",
-                    "picture_url" => "test.jpg"
+                    "picture_url" => "test.jpg",
+                    // "default_plain_password" => "offre"
                 ]
-
-            ]
+            ],
         ];
     }
 
