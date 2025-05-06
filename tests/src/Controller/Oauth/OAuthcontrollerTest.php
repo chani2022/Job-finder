@@ -146,12 +146,7 @@ class OAuthcontrollerTest extends KernelTestCase
                 "facebook",
                 [
                     "email" => "email@email.com",
-<<<<<<< HEAD
-                    "picture_url" => "test.jpg"
-=======
                     "picture_url" => "test.jpg",
-                    // "default_plain_password" => "offre"
->>>>>>> main
                 ]
             ],
         ];
