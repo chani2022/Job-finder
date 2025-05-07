@@ -79,8 +79,6 @@ final class OAuthController extends AbstractController
         $user_found = true;
         if (is_null($user_fetch)) {
             $user_found = false;
-            // default value si utilisateur n'est pas encore membre
-            // $plain_password = "offre";
             $user_fetch = (new User())
                 ->setPassword(
                     $this->hasher->hashPassword(new User(), static::DEFAULT_PLAIN_PASSWORD)
@@ -107,11 +105,6 @@ final class OAuthController extends AbstractController
             }
 
             $this->uploadFile($user_fetch, $image_oauth);
-            // ->setPassword(
-            //     $this->hasher->hashPassword($user, $plain_password)
-            // )
-            // ->setStatus(true)
-            // ->setUsername($username);
 
             $this->em->persist($user_fetch);
             $this->em->flush();
