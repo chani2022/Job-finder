@@ -24,7 +24,7 @@ class SocietyGetCollectionControllerTest extends ApiTestCase
     /**
      * @dataProvider getUsers
      */
-    public function testAuthorizedShowCollection(int $hierarchy, bool $is_super): void
+    public function testAuthorizedShowCollectionSociety(int $hierarchy, bool $is_super): void
     {
         $user_load = null;
         if ($is_super) {

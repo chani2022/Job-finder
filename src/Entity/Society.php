@@ -27,7 +27,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             validationContext: ['groups' => ['post:society:validator']],
             processor: SocietyPostProcessor::class
         ),
-        // new GetCollection()
+        new GetCollection()
     ]
 )]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['nom_society'])]
