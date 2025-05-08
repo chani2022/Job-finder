@@ -20,7 +20,6 @@ use App\State\ChangePasswordProcessor;
 use App\State\DisabledUserProcessor;
 use App\State\PostUserProcessor;
 use App\State\ProfilUserProcessor;
-use App\State\Provider\UserProvider;
 use Doctrine\ORM\Mapping as ORM;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -43,8 +42,7 @@ use Symfony\Component\Security\Core\Validator\Constraints as SecurityAssert;
     denormalizationContext: ["groups" => ["write:user"]],
     operations: [
         new GetCollection(
-            order: ['id' => 'DESC'],
-            provider: UserProvider::class
+            // order: ['id' => 'DESC'],
         ),
         new Get(),
         new Post(
