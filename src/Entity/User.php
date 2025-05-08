@@ -14,7 +14,6 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\RequestBody;
-use App\Controller\UserDisabledController;
 use App\Repository\UserRepository;
 use App\State\ChangePasswordProcessor;
 use App\State\DisabledUserProcessor;

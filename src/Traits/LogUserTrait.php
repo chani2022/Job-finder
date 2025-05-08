@@ -8,6 +8,7 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
 trait LogUserTrait
 {
+
     public function logUserTrait(User $user)
     {
         $tokenManager = static::getContainer()->get(TokenStorageInterface::class);

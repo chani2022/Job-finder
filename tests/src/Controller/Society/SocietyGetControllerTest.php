@@ -7,7 +7,7 @@ use ApiPlatform\Symfony\Bundle\Test\Client;
 use App\Traits\FixturesTrait;
 use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
 
-class SocietyGetCollectionControllerTest extends ApiTestCase
+class SocietyGetControllerTest extends ApiTestCase
 {
     use RefreshDatabaseTrait;
     use FixturesTrait;
@@ -23,20 +23,26 @@ class SocietyGetCollectionControllerTest extends ApiTestCase
     /**
      * @dataProvider getUsers
      */
-    public function testAuthorizedShowCollectionSociety(?string $roles): void
+    public function testAuthorizedShowGetSociety(?string $roles): void
     {
+        $this->loadFixturesTrait();
+        /** @var User */
+        $user_load = $this->all_fixtures["admin"];
+        $society_load = $user_load->getSociety();
+
         $user_load = match ($roles) {
-            "super" => $this->all_fixtures['super'],
-            "admin" => $this->all_fixtures['admin'],
-            "admin_not_access" => $this->all_fixtures['admin_1'],
-            "user" => $this->all_fixtures['user_activate_society'],
+            "super" => $this->all_fixtures["super"],
+            "admin" => $user_load,
+            "admin_not_access" => $this->all_fixtures["admin_1"],
+            "user" => $this->all_fixtures["user_1"],
             default => null
         };
 
         if ($user_load) {
             $this->client->loginUser($user_load);
         }
-        $this->client->request('GET', '/api/societies');
+
+        $this->client->request("GET", "/api/societies/" . $society_load->getId());
 
         $this->assert($roles);
     }
@@ -56,7 +62,7 @@ class SocietyGetCollectionControllerTest extends ApiTestCase
             "user" => [
                 "roles" => "user",
             ],
-            "anonymous" => [
+            "anomymous" => [
                 "roles" => null
             ]
         ];
@@ -64,7 +70,7 @@ class SocietyGetCollectionControllerTest extends ApiTestCase
 
     private function assert($roles): void
     {
-        if ($roles == "super") {
+        if ($roles == "super" or $roles == "admin") {
             $this->assertResponseIsSuccessful();
         } else {
             $status = 403;

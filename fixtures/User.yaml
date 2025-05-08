@@ -18,6 +18,14 @@ App\Entity\User:
         society: '@adm'
         status: true
 
+    admin_1:
+        email: admin_1@admin.com
+        username: admin_1
+        password: <hashPassword('admin')>
+        roles: ['ROLE_ADMIN']
+        society: '@adm_1'
+        status: true
+
     super:
         email: super@admin.com
         username: super
