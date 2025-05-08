@@ -42,8 +42,22 @@ services:
     depends_on:
       - database
       - phpadmin
-    # command: bash -c "php bin/console doctrine:schema:update --force && php bin/console doctrine:schema:update --force --env=test && php bin/console h:f:l"
+      - meilisearch
+    command: bash -c "php bin/console meili:create --env=test"
     # command: bash -c "ls -la /var/www/docker.local"
+  meilisearch:
+    image: getmeili/meilisearch:v1.4.0
+    container_name: meilisearch
+    environment:
+      MEILI_MASTER_KEY: ${MEILISEARCH_API_KEY} # Clé secrète (remplacez-la)
+      MEILI_ENV: development # Ou "production" en prod
+      MEILI_NO_ANALYTICS: true # Désactive les analytics
+    volumes:
+      - meilisearch_data:/data.ms # Persistance des données
+    ports:
+      - "7700:7700" # Port exposé (HTTP)
+    restart: unless-stopped
 
 volumes:
   mariadb-data:
+  meilisearch_data:
