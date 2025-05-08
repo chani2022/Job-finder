@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
@@ -20,6 +21,7 @@ use App\State\ChangePasswordProcessor;
 use App\State\DisabledUserProcessor;
 use App\State\PostUserProcessor;
 use App\State\ProfilUserProcessor;
+use App\State\Provider\User\UserProvider;
 use Doctrine\ORM\Mapping as ORM;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -42,7 +44,7 @@ use Symfony\Component\Security\Core\Validator\Constraints as SecurityAssert;
     denormalizationContext: ["groups" => ["write:user"]],
     operations: [
         new GetCollection(
-            order: ['id' => 'DESC'],
+            provider: UserProvider::class
         ),
         new Get(),
         new Post(
@@ -141,6 +143,7 @@ use Symfony\Component\Security\Core\Validator\Constraints as SecurityAssert;
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email', "username"])]
 #[UniqueEntity(fields: ["email"], groups: ["post:create:validator", "profil:validator"])]
 #[UniqueEntity(fields: ["username"], groups: ["post:create:validator", "profil:validator"])]
+// #[ApiFilter()]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUserInterface
 {
     #[ORM\Id]

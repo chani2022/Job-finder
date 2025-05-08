@@ -62,3 +62,5 @@ meilisearch:
             stopWords: ['le', 'la', 'de']             # Mots ignorés
             synonyms:                                  # Synonymes
                 admin: ['administrator', 'superuser']
+
+    nbResults: 200

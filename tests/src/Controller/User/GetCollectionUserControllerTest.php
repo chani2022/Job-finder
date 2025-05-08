@@ -18,7 +18,6 @@ class GetCollectionUserControllerTest extends ApiTestCase
     public function testGetCollectionUser(): void
     {
         $this->client->request('GET', '/api/users');
-
         $this->assertResponseIsSuccessful();
     }
 
