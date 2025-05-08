@@ -43,13 +43,13 @@ class Society
     #[ORM\GeneratedValue]
     #[
         ORM\Column,
-        Groups(["read:society:get", "read:society:collection"])
+        Groups(["read:society:get", "read:society:collection", 'read:user:get', 'read:user:collection'])
     ]
     private ?int $id = null;
 
     #[
         ORM\Column(length: 255),
-        Groups(["read:society:get", "read:society:collection", 'write:society:post', 'write:society']),
+        Groups(["read:society:get", "read:society:collection", 'write:society:post', 'write:society', 'read:user:get', 'read:user:collection']),
         Assert\NotBlank(['groups' => ['post:society:validator']])
     ]
     private ?string $nom_society = null;

@@ -14,6 +14,7 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\RequestBody;
+
 use App\Repository\UserRepository;
 use App\State\ChangePasswordProcessor;
 use App\State\DisabledUserProcessor;
@@ -41,7 +42,7 @@ use Symfony\Component\Security\Core\Validator\Constraints as SecurityAssert;
     denormalizationContext: ["groups" => ["write:user"]],
     operations: [
         new GetCollection(
-            order: ['id' => 'DESC']
+            order: ['id' => 'DESC'],
         ),
         new Get(),
         new Post(
@@ -146,13 +147,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     #[ORM\GeneratedValue]
     #[
         ORM\Column,
-        Groups(["read:user:get", "read:user:collection", "read:society:get", "read:society:collection"])
+        Groups(["read:user:get", "read:user:collection", "read:society:get", "read:society:collection", "read:society:get", "read:society:collection"])
     ]
     private ?int $id = null;
 
     #[
         ORM\Column(length: 180),
-        Groups(["read:user:get", "read:user:collection", "post:create:user"]),
+        Groups(["read:user:get", "read:user:collection", "post:create:user", "read:society:get", "read:society:collection"]),
         Assert\NotBlank(groups: ["post:create:validator", "profil:validator"]),
         Assert\Email(groups: ["post:create:validator", "profil:validator"])
     ]
@@ -163,7 +164,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
      */
     #[
         ORM\Column,
-        Groups(["read:user:get", "read:user:collection", "read:society:get", "read:society:collection"])
+        Groups(["read:user:get", "read:user:collection", "read:society:get", "read:society:collection", "read:society:get", "read:society:collection"])
     ]
     private array $roles = [];
 
@@ -185,7 +186,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
 
     #[
         ORM\Column(length: 255, nullable: true),
-        Groups(["read:user:get", "read:user:collection"]),
+        Groups(["read:user:get", "read:user:collection", "read:society:get", "read:society:collection"]),
         Assert\NotBlank(groups: ["profil:validator"])
     ]
     private ?string $prenom = null;
@@ -223,7 +224,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     private ?string $username = null;
 
     #[ORM\OneToOne(targetEntity: MediaObject::class, cascade: ['persist', 'remove'])]
-
     #[ORM\JoinColumn(nullable: true)]
     #[ApiProperty(types: ['https://schema.org/image'])]
     #[
@@ -237,7 +237,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     ]
     private ?bool $status = null;
 
-    #[ORM\ManyToOne(inversedBy: 'users')]
+    #[
+        ORM\ManyToOne(inversedBy: 'users'),
+        Groups(["read:user:get", "read:user:collection"])
+    ]
     private ?Society $society = null;
 
     public function __construct()

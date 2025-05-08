@@ -7,3 +7,58 @@ meilisearch:
         # See https://github.com/meilisearch/meilisearch-symfony/wiki/configure-searchable-data
         - name: user
           class: App\Entity\User
+          enable_serializer_groups: true
+          serializer_groups: ["read:user:collection"]
+          settings:
+            searchableAttributes: ['*'] # Champs recherchables
+            filterableAttributes: ['roles', 'isActive']  # Filtres possibles
+            typoTolerance:
+                enabled: true
+                # minWordSizeForTypos:
+                #     oneTypo: 5  # Taille minimale pour 1 faute de frappe
+                #     twoTypos: 6  # Taille minimale pour 2 fautes de frappe
+                disableOnWords: ['nike', 'adidas']  # Ignore les typos pour ces mots
+                disableOnAttributes: ['id', 'email']  # Désactive sur ces champs
+            sortableAttributes: ['id:desc']           # Tri possible
+            # attributesToHighlight: ['*']
+            # highlightPreTag: '<em>'
+            # highlightPostTag: '</em>'
+            rankingRules:                              # Priorités de recherche
+                - words
+                - typo
+                - proximity
+                - sort
+            stopWords: ['le', 'la', 'de']             # Mots ignorés
+            synonyms:                                  # Synonymes
+                admin: ['administrator', 'superuser']
+
+        # - name: Mediaobject
+        #   class: App\Entity\MediaObject
+        #   enable_serializer_groups: true
+        #   settings:
+        #     searchableAttributes: ['username', 'email'] # Champs recherchables
+        #     filterableAttributes: ['roles', 'isActive']  # Filtres possibles
+        #     sortableAttributes: ['createdAt']           # Tri possible
+        #     rankingRules:                              # Priorités de recherche
+        #         - words
+        #         - typo
+        #         - proximity
+        #     stopWords: ['le', 'la', 'de']             # Mots ignorés
+        #     synonyms:                                  # Synonymes
+        #         admin: ['administrator', 'superuser']
+        
+        - name: society
+          class: App\Entity\Society
+          enable_serializer_groups: true
+          serializer_groups: ["read:society:get", "read:society:collection"]
+          settings:
+            searchableAttributes: ['nom_society'] # Champs recherchables
+            # filterableAttributes: ['roles', 'isActive']  # Filtres possibles
+            sortableAttributes: ['nom_society']           # Tri possible
+            rankingRules:                              # Priorités de recherche
+                - words
+                - typo
+                - proximity
+            stopWords: ['le', 'la', 'de']             # Mots ignorés
+            synonyms:                                  # Synonymes
+                admin: ['administrator', 'superuser']

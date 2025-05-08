@@ -19,6 +19,7 @@ parameters:
     #meilisearch
     meilisearch_url: '%env(MEILISEARCH_URL)%'
     meilisearch_api_key: '%env(MEILISEARCH_API_KEY)%'
+    meilisearch_prefix: '%env(MEILISEARCH_PREFIX)%'
 
 services:
     # default configuration for services in *this* file
@@ -65,6 +66,7 @@ services:
         arguments:
             $meili_url: '%meilisearch_url%'
             $meili_key: '%meilisearch_api_key%'
+            $meili_prefix: '%meilisearch_prefix%'
 
 
 
