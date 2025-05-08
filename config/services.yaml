@@ -16,6 +16,10 @@ parameters:
 
     redirect_url_front: '%env(REDIRECT_URL_FRONT)%'
 
+    #meilisearch
+    meilisearch_url: '%env(MEILISEARCH_URL)%'
+    meilisearch_api_key: '%env(MEILISEARCH_API_KEY)%'
+
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -56,6 +60,12 @@ services:
     App\Controller\OAuthController:
         arguments:
             $redirect_url_front: '%redirect_url_front%'
+
+    App\MeiliSearch\MeiliSearchService:
+        arguments:
+            $meili_url: '%meilisearch_url%'
+            $meili_key: '%meilisearch_api_key%'
+
 
 
     

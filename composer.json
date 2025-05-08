@@ -19,6 +19,7 @@
         "league/oauth2-facebook": "^2.2",
         "league/oauth2-google": "*",
         "lexik/jwt-authentication-bundle": "^3.1",
+        "meilisearch/search-bundle": "^0.15.7",
         "nelmio/cors-bundle": "^2.5",
         "payum/payum": "^1.7",
         "payum/payum-bundle": "^2.6",

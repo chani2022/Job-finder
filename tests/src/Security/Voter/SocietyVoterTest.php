@@ -18,8 +18,7 @@ class SocietyVoterTest extends KernelTestCase
     use FixturesTrait;
     use LogUserTrait;
 
-    private ?SocietyVoter $societyVoter;
-
+    private SocietyVoter $societyVoter;
 
     protected function setUp(): void
     {
@@ -119,6 +118,6 @@ class SocietyVoterTest extends KernelTestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-        $this->societyVoter = null;
+        // $this->societyVoter = null;
     }
 }
