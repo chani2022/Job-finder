@@ -14,9 +14,21 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libpq-dev \
     libonig-dev \
-    libzip-dev \
+    libzip-dev \    
+    libxml2-dev \
+    libcurl4-openssl-dev \
+    libicu-dev \
+    zlib1g-dev \
     zip \
-    && docker-php-ext-install pdo pdo_mysql zip
+    && docker-php-ext-install \
+    intl \
+    pdo \
+    pdo_mysql \
+    zip \
+    opcache \
+    xml \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
 # RUN curl -sS https://get.symfony.com/cli/installer | bash
 # RUN mv /root/.symfony5/bin/symfony /usr/local/bin/symfony
