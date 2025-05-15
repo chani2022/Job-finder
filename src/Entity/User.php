@@ -46,7 +46,9 @@ use Symfony\Component\Security\Core\Validator\Constraints as SecurityAssert;
         new GetCollection(
             provider: UserProvider::class
         ),
-        new Get(),
+        new Get(
+            provider: UserProvider::class,
+        ),
         new Post(
             denormalizationContext: ["groups" => ["post:create:user"]],
             validationContext: ["groups" => ["post:create:validator"]],
