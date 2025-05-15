@@ -48,6 +48,7 @@ use Symfony\Component\Security\Core\Validator\Constraints as SecurityAssert;
         ),
         new Get(
             provider: UserProvider::class,
+            security: "is_granted('GET_VIEW', object)"
         ),
         new Post(
             denormalizationContext: ["groups" => ["post:create:user"]],
