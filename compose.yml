@@ -43,7 +43,7 @@ services:
       - database
       - phpadmin
       - meilisearch
-    command: bash -c "php bin/console meili:create --env=test"
+    # command: bash -c "php bin/console meili:create --env=test"
     # command: bash -c "ls -la /var/www/docker.local"
   meilisearch:
     image: getmeili/meilisearch:v1.4.0

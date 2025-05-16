@@ -50,6 +50,10 @@ jobs:
         run: |
           docker exec $(docker ps -qf "name=app") php bin/console doctrine:schema:update --force
 
+      - name: Run meilisearch server
+        run: |
+          docker exec $(docker ps -qf "name=app") php bin/console meili:create
+
       - name: Check schema doctrine
         run: |
           docker exec $(docker ps -qf "name=app") php bin/console doctrine:schema:validate
