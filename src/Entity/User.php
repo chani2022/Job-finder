@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
@@ -15,7 +14,6 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\RequestBody;
-
 use App\Repository\UserRepository;
 use App\State\ChangePasswordProcessor;
 use App\State\DisabledUserProcessor;
@@ -44,7 +42,8 @@ use Symfony\Component\Security\Core\Validator\Constraints as SecurityAssert;
     denormalizationContext: ["groups" => ["write:user"]],
     operations: [
         new GetCollection(
-            provider: UserProvider::class
+            provider: UserProvider::class,
+            security: "is_granted('ROLE_SUPER_ADMIN')"
         ),
         new Get(
             provider: UserProvider::class,

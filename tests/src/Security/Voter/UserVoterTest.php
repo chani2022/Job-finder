@@ -24,10 +24,11 @@ class UserVoterTest extends KernelTestCase
         static::bootKernel();
         $this->loadFixturesTrait();
     }
-
-    public function testSupportsUser(): void
+    /**
+     * @dataProvider getSupportsUser
+     */
+    public function testSupportsUser(string $attribute): void
     {
-        $attribute = UserVoter::VIEW;
         $subject = new User();
         $methodSupports = new ReflectionMethod($this->userVoter, 'supports');
         $methodSupports->setAccessible(true);
@@ -38,9 +39,29 @@ class UserVoterTest extends KernelTestCase
     /**
      * @dataProvider getUser
      */
-    public function testUserVoteOnAttribute(string $roles, bool $can_read): void
+    public function testUserVoteOnAttributeGetView(string $roles, bool $can_read, string $attribute): void
     {
         $subject = $this->all_fixtures['user_adm_society'];
+
+        $res = $this->invokeMethod($roles, $subject, $attribute);
+
+        $this->assert($res, $can_read);
+    }
+    /**
+     * @dataProvider getUserToViewCollection
+     */
+    public function testUserVoteOnAttributeCollectionView(string $roles, bool $can_read, string $attribute): void
+    {
+        $subject = null;
+        $res = $this->invokeMethod($roles, $subject, $attribute);
+
+        $this->assert($res, $can_read);
+    }
+    /**
+     * @return mixed
+     */
+    private function invokeMethod(string $roles, mixed $subject, string $attribute): mixed
+    {
         /** @var User */
         $user_access_resource = match ($roles) {
             'super-admin' => $this->all_fixtures['super'],
@@ -50,18 +71,14 @@ class UserVoterTest extends KernelTestCase
             'user-other' => $this->all_fixtures['user_1'],
             default => null
         };
+        $methodVoteOnAttribute = new ReflectionMethod($this->userVoter, 'voteOnAttribute');
+        $methodVoteOnAttribute->setAccessible(true);
+
         $token = new UsernamePasswordToken($user_access_resource ?? new User(), 'api', $user_access_resource ? $user_access_resource->getRoles() : []);
-
-        $attribute = UserVoter::VIEW;
-        $methodSupports = new ReflectionMethod($this->userVoter, 'voteOnAttribute');
-        $methodSupports->setAccessible(true);
-
-        $res = $methodSupports->invoke($this->userVoter, $attribute, $subject, $token);
-
-        $this->assert($res, $can_read);
+        return $methodVoteOnAttribute->invoke($this->userVoter, $attribute, $subject, $token);
     }
 
-    private function assert(bool $excepted, $can_read): void
+    private function assert(bool $excepted, bool $can_read): void
     {
         if ($can_read) {
             $this->assertTrue($excepted);
@@ -70,15 +87,35 @@ class UserVoterTest extends KernelTestCase
         }
     }
 
+    public static function getSupportsUser(): array
+    {
+        return [
+            "item" => ['attribute' => UserVoter::GET_VIEW],
+            "collection" => ['attribute' => UserVoter::COLLECTION_VIEW]
+        ];
+    }
+
     public static function getUser(): array
     {
         return [
-            "super-admin" => ['roles' => 'super-admin', 'can_read' => true],
-            "admin-owner-user" => ['roles' => 'admin-owner-user', 'can_read' => true],
-            "user-owner" => ['roles' => 'user-owner', 'can_read' => true],
-            "admin-other" => ['roles' => 'admin-other', 'can_read' => false],
-            "user-other" => ['roles' => 'user-other', 'can_read' => false],
-            "anonymous" => ['roles' => 'anonymous', 'can_read' => false]
+            "super-admin" => ['roles' => 'super-admin', 'can_read' => true, 'attribute' => UserVoter::GET_VIEW],
+            "admin-owner-user" => ['roles' => 'admin-owner-user', 'can_read' => true, 'attribute' => UserVoter::GET_VIEW],
+            "user-owner" => ['roles' => 'user-owner', 'can_read' => true, 'attribute' => UserVoter::GET_VIEW],
+            "admin-other" => ['roles' => 'admin-other', 'can_read' => false, 'attribute' => UserVoter::GET_VIEW],
+            "user-other" => ['roles' => 'user-other', 'can_read' => false, 'attribute' => UserVoter::GET_VIEW],
+            "anonymous" => ['roles' => 'anonymous', 'can_read' => false, 'attribute' => UserVoter::GET_VIEW]
+        ];
+    }
+
+    public static function getUserToViewCollection(): array
+    {
+        return [
+            "super-admin" => ['roles' => 'super-admin', 'can_read' => true, 'attribute' => UserVoter::COLLECTION_VIEW],
+            "admin-owner-user" => ['roles' => 'admin-owner-user', 'can_read' => false, 'attribute' => UserVoter::COLLECTION_VIEW],
+            "user-owner" => ['roles' => 'user-owner', 'can_read' => false, 'attribute' => UserVoter::COLLECTION_VIEW],
+            "admin-other" => ['roles' => 'admin-other', 'can_read' => false, 'attribute' => UserVoter::COLLECTION_VIEW],
+            "user-other" => ['roles' => 'user-other', 'can_read' => false, 'attribute' => UserVoter::COLLECTION_VIEW],
+            "anonymous" => ['roles' => 'anonymous', 'can_read' => false, 'attribute' => UserVoter::COLLECTION_VIEW]
         ];
     }
 
