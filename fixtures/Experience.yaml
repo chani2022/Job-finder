@@ -1,0 +1,3 @@
+App\Entity\Experience:
+  experience_unique:
+    nombre_experience: '2'

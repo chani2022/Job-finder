@@ -8,7 +8,7 @@ use App\Entity\User;
 use App\Traits\FixturesTrait;
 use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
 
-class ExperienceControllerTest extends ApiTestCase
+class GetCollectionExperienceControllerTest extends ApiTestCase
 {
     use RefreshDatabaseTrait;
     use FixturesTrait;
