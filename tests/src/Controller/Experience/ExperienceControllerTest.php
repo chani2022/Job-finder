@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Tests\src\Controller\NiveauEtude;
+namespace App\Tests\src\Controller\Experience;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use ApiPlatform\Symfony\Bundle\Test\Client;
+use App\Entity\User;
 use App\Traits\FixturesTrait;
 use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
-use App\Entity\User;
 
-class GetCollectionNiveauEtudeControllerTest extends ApiTestCase
+class ExperienceControllerTest extends ApiTestCase
 {
     use RefreshDatabaseTrait;
     use FixturesTrait;
@@ -18,20 +18,22 @@ class GetCollectionNiveauEtudeControllerTest extends ApiTestCase
     protected function setUp(): void
     {
         parent::setUp();
+
         $this->client = $this->createClient();
         $this->loadFixturesTrait();
     }
+
     /**
      * @dataProvider getUserAuthorized
      */
-    public function testGetCollectionNiveauEtude(?string $roles, bool $access): void
+    public function testGetCollectionExperience(?string $roles, bool $access): void
     {
         /** @var User */
         $user = $this->getUser($roles);
         if ($user) {
             $this->client->loginUser($user);
         }
-        $this->client->request('GET', '/api/niveau_etudes');
+        $this->client->request('GET', '/api/experiences');
 
         if ($access) {
             $this->assertResponseIsSuccessful();
@@ -67,6 +69,7 @@ class GetCollectionNiveauEtudeControllerTest extends ApiTestCase
 
         return $user;
     }
+
     protected function tearDown(): void
     {
         $this->client = null;
