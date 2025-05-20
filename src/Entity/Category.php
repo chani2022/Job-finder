@@ -52,9 +52,16 @@ class Category
     #[ORM\OneToMany(targetEntity: SecteurActivite::class, mappedBy: 'category')]
     private Collection $secteurActivites;
 
+    /**
+     * @var Collection<int, Abonnement>
+     */
+    #[ORM\OneToMany(targetEntity: Abonnement::class, mappedBy: 'category')]
+    private Collection $abonnements;
+
     public function __construct()
     {
         $this->secteurActivites = new ArrayCollection();
+        $this->abonnements = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -98,6 +105,36 @@ class Category
             // set the owning side to null (unless already changed)
             if ($secteurActivite->getCategory() === $this) {
                 $secteurActivite->setCategory(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Abonnement>
+     */
+    public function getAbonnements(): Collection
+    {
+        return $this->abonnements;
+    }
+
+    public function addAbonnement(Abonnement $abonnement): static
+    {
+        if (!$this->abonnements->contains($abonnement)) {
+            $this->abonnements->add($abonnement);
+            $abonnement->setCategory($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAbonnement(Abonnement $abonnement): static
+    {
+        if ($this->abonnements->removeElement($abonnement)) {
+            // set the owning side to null (unless already changed)
+            if ($abonnement->getCategory() === $this) {
+                $abonnement->setCategory(null);
             }
         }
 
