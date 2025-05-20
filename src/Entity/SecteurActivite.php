@@ -37,6 +37,9 @@ class SecteurActivite
     ]
     private ?string $type_secteur = null;
 
+    #[ORM\ManyToOne(inversedBy: 'secteurActivites')]
+    private ?Category $category = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -50,6 +53,18 @@ class SecteurActivite
     public function setTypeSecteur(string $type_secteur): static
     {
         $this->type_secteur = strtoupper($type_secteur);
+
+        return $this;
+    }
+
+    public function getCategory(): ?Category
+    {
+        return $this->category;
+    }
+
+    public function setCategory(?Category $category): static
+    {
+        $this->category = $category;
 
         return $this;
     }
