@@ -20,6 +20,8 @@ use App\State\DisabledUserProcessor;
 use App\State\PostUserProcessor;
 use App\State\ProfilUserProcessor;
 use App\State\Provider\User\UserProvider;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -248,9 +250,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     ]
     private ?Society $society = null;
 
+    /**
+     * @var Collection<int, Abonnement>
+     */
+    #[ORM\OneToMany(targetEntity: Abonnement::class, mappedBy: 'user')]
+    private Collection $abonnements;
+
     public function __construct()
     {
         $this->status = false;
+        $this->abonnements = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -444,6 +453,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     public function setSociety(?Society $society): static
     {
         $this->society = $society;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Abonnement>
+     */
+    public function getAbonnements(): Collection
+    {
+        return $this->abonnements;
+    }
+
+    public function addAbonnement(Abonnement $abonnement): static
+    {
+        if (!$this->abonnements->contains($abonnement)) {
+            $this->abonnements->add($abonnement);
+            $abonnement->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAbonnement(Abonnement $abonnement): static
+    {
+        if ($this->abonnements->removeElement($abonnement)) {
+            // set the owning side to null (unless already changed)
+            if ($abonnement->getUser() === $this) {
+                $abonnement->setUser(null);
+            }
+        }
 
         return $this;
     }

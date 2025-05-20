@@ -52,6 +52,7 @@ class Category
     #[ORM\OneToMany(targetEntity: SecteurActivite::class, mappedBy: 'category')]
     private Collection $secteurActivites;
 
+
     public function __construct()
     {
         $this->secteurActivites = new ArrayCollection();
