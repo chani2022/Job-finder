@@ -23,6 +23,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
             security: 'is_granted("ROLE_SUPER_ADMIN")',
             validationContext: ['groups' => ['post:create:validator']]
         )
+
     ]
 )]
 #[UniqueEntity(fields: ["nombre_experience"], groups: ["post:create:validator"])]

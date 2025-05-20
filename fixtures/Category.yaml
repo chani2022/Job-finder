@@ -1,0 +1,3 @@
+App\Entity\Category:
+  category_unique:
+    nom_category: 'unique'
