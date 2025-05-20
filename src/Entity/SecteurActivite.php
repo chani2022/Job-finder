@@ -4,13 +4,16 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use App\Repository\SecteurActiviteRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 #[ApiResource(
+    normalizationContext: ['groups' => ['read:get:secteurActivite', 'read:collection:secteurActivite']],
     operations: [
         new GetCollection(
             security: 'is_granted("ROLE_SUPER_ADMIN")'
@@ -18,6 +21,9 @@ use Symfony\Component\Validator\Constraints\NotBlank;
         new Post(
             security: 'is_granted("ROLE_SUPER_ADMIN")',
             validationContext: ['groups' => 'post:create:validator']
+        ),
+        new Get(
+            security: 'is_granted("ROLE_SUPER_ADMIN")',
         )
 
     ]
@@ -28,17 +34,25 @@ class SecteurActivite
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[
+        ORM\Column,
+        Groups(groups: ['read:get:secteurActivite', 'read:collection:secteurActivite'])
+    ]
     private ?int $id = null;
 
     #[
         ORM\Column(length: 255),
-        NotBlank(groups: ['post:create:validator'])
+        NotBlank(groups: ['post:create:validator']),
+        Groups(groups: ['read:get:secteurActivite', 'read:collection:secteurActivite'])
     ]
     private ?string $type_secteur = null;
 
-    #[ORM\ManyToOne(inversedBy: 'secteurActivites')]
+    #[
+        ORM\ManyToOne(inversedBy: 'secteurActivites'),
+        Groups(groups: ['read:get:secteurActivite', 'read:collection:secteurActivite'])
+    ]
     private ?Category $category = null;
+
 
     public function getId(): ?int
     {

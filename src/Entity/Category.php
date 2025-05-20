@@ -35,13 +35,13 @@ class Category
     #[ORM\GeneratedValue]
     #[
         ORM\Column,
-        Groups(['read:get:category', 'read:collection:category'])
+        Groups(['read:get:category', 'read:collection:category', 'read:get:secteurActivite', 'read:collection:secteurActivite'])
     ]
     private ?int $id = null;
 
     #[
         ORM\Column(length: 255),
-        Groups(['read:get:category', 'read:collection:category', 'post:create:category']),
+        Groups(['read:get:category', 'read:collection:category', 'post:create:category', 'read:get:secteurActivite', 'read:collection:secteurActivite']),
         NotBlank(groups: ['post:create:validator'])
     ]
     private ?string $nom_category = null;
