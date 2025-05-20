@@ -54,45 +54,6 @@ class GetSecteurActiviteControllerTest extends ApiTestCase
         }
     }
 
-    /**
-     * @dataProvider getDataValid
-     */
-    // public function testPostValidDataSecteurActivite(array $data): void
-    // {
-    //     $this->myLogUser();
-
-    //     $this->client->request('POST', '/api/secteur_activites', [
-    //         "json" => $data
-    //     ]);
-
-    //     if ($data['type_secteur']) {
-    //         $this->assertResponseStatusCodeSame(201);
-    //     } else {
-    //         $this->assertResponseStatusCodeSame(422);
-    //     }
-    // }
-
-    // public function testUniqueSecteurActivite(): void
-    // {
-    //     $this->myLogUser();
-
-    //     $this->client->request('POST', '/api/secteur_activites', [
-    //         "json" => [
-    //             'secteur_activite' => 'unique'
-    //         ]
-    //     ]);
-
-    //     $this->assertResponseStatusCodeSame(422);
-    // }
-
-    // public static function getDataValid(): array
-    // {
-    //     return [
-    //         "valid" => [["type_secteur" => 'bacc']],
-    //         'blank' => [["type_secteur" => '']]
-    //     ];
-    // }
-
     private function getUser(?string $roles): ?User
     {
         /** @var User */

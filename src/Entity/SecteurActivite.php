@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use App\Entity\Category;
 
 #[ApiResource(
     normalizationContext: ['groups' => ['read:get:secteurActivite', 'read:collection:secteurActivite']],
