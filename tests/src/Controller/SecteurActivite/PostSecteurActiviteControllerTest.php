@@ -63,20 +63,20 @@ class PostSecteurActiviteControllerTest extends ApiTestCase
             "json" => $data
         ]);
 
-        if ($data['niveau_etude']) {
+        if ($data['type_secteur']) {
             $this->assertResponseStatusCodeSame(201);
         } else {
             $this->assertResponseStatusCodeSame(422);
         }
     }
 
-    public function testUniqueNiveauEtude(): void
+    public function testUniqueSecteurActivite(): void
     {
         $this->myLogUser();
 
         $this->client->request('POST', '/api/secteur_activites', [
             "json" => [
-                'niveau_etude' => 'unique'
+                'secteur_activite' => 'unique'
             ]
         ]);
 
@@ -86,8 +86,8 @@ class PostSecteurActiviteControllerTest extends ApiTestCase
     public static function getDataValid(): array
     {
         return [
-            "valid" => [["niveau_etude" => 'bacc']],
-            'blank' => [["niveau_etude" => '']]
+            "valid" => [["type_secteur" => 'bacc']],
+            'blank' => [["type_secteur" => '']]
         ];
     }
 

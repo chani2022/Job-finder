@@ -7,6 +7,8 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use App\Repository\SecteurActiviteRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 #[ApiResource(
     operations: [
@@ -14,12 +16,14 @@ use Doctrine\ORM\Mapping as ORM;
             security: 'is_granted("ROLE_SUPER_ADMIN")'
         ),
         new Post(
-            security: 'is_granted("ROLE_SUPER_ADMIN")'
+            security: 'is_granted("ROLE_SUPER_ADMIN")',
+            validationContext: ['groups' => 'post:create:validator']
         )
 
     ]
 )]
 #[ORM\Entity(repositoryClass: SecteurActiviteRepository::class)]
+#[UniqueEntity(fields: ['type_secteur'], groups: ['post:create:validator'])]
 class SecteurActivite
 {
     #[ORM\Id]
@@ -27,7 +31,10 @@ class SecteurActivite
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[
+        ORM\Column(length: 255),
+        NotBlank(groups: ['post:create:validator'])
+    ]
     private ?string $type_secteur = null;
 
     public function getId(): ?int
