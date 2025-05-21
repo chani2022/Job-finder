@@ -7,6 +7,8 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use App\Repository\SecteurActiviteRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -54,6 +56,17 @@ class SecteurActivite
     ]
     private ?Category $category = null;
 
+    /**
+     * @var Collection<int, OffreEmploi>
+     */
+    #[ORM\OneToMany(targetEntity: OffreEmploi::class, mappedBy: 'secteurActivite')]
+    private Collection $offreEmplois;
+
+    public function __construct()
+    {
+        $this->offreEmplois = new ArrayCollection();
+    }
+
 
     public function getId(): ?int
     {
@@ -80,6 +93,36 @@ class SecteurActivite
     public function setCategory(?Category $category): static
     {
         $this->category = $category;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, OffreEmploi>
+     */
+    public function getOffreEmplois(): Collection
+    {
+        return $this->offreEmplois;
+    }
+
+    public function addOffreEmploi(OffreEmploi $offreEmploi): static
+    {
+        if (!$this->offreEmplois->contains($offreEmploi)) {
+            $this->offreEmplois->add($offreEmploi);
+            $offreEmploi->setSecteurActivite($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOffreEmploi(OffreEmploi $offreEmploi): static
+    {
+        if ($this->offreEmplois->removeElement($offreEmploi)) {
+            // set the owning side to null (unless already changed)
+            if ($offreEmploi->getSecteurActivite() === $this) {
+                $offreEmploi->setSecteurActivite(null);
+            }
+        }
 
         return $this;
     }
