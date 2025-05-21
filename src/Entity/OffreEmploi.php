@@ -2,11 +2,23 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
 use App\Repository\OffreEmploiRepository;
+use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: OffreEmploiRepository::class)]
+#[ApiResource(
+    operations: [
+        new GetCollection(),
+        new Post(
+            security: 'is_granted("ROLE_ADMIN")'
+        )
+    ]
+)]
 class OffreEmploi
 {
     #[ORM\Id]
@@ -37,6 +49,10 @@ class OffreEmploi
 
     #[ORM\ManyToOne(inversedBy: 'offreEmplois')]
     private ?Experience $experience = null;
+
+    #[ORM\ManyToOne(inversedBy: 'offreEmplois')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
 
     public function getId(): ?int
     {
@@ -135,6 +151,18 @@ class OffreEmploi
     public function setExperience(?Experience $experience): static
     {
         $this->experience = $experience;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
 
         return $this;
     }

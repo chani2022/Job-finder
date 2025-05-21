@@ -298,10 +298,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     #[ORM\OneToMany(targetEntity: Abonnement::class, mappedBy: 'user')]
     private Collection $abonnements;
 
+    /**
+     * @var Collection<int, OffreEmploi>
+     */
+    #[ORM\OneToMany(targetEntity: OffreEmploi::class, mappedBy: 'user')]
+    private Collection $offreEmplois;
+
     public function __construct()
     {
         $this->status = false;
         $this->abonnements = new ArrayCollection();
+        $this->offreEmplois = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -523,6 +530,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
             // set the owning side to null (unless already changed)
             if ($abonnement->getUser() === $this) {
                 $abonnement->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, OffreEmploi>
+     */
+    public function getOffreEmplois(): Collection
+    {
+        return $this->offreEmplois;
+    }
+
+    public function addOffreEmploi(OffreEmploi $offreEmploi): static
+    {
+        if (!$this->offreEmplois->contains($offreEmploi)) {
+            $this->offreEmplois->add($offreEmploi);
+            $offreEmploi->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOffreEmploi(OffreEmploi $offreEmploi): static
+    {
+        if ($this->offreEmplois->removeElement($offreEmploi)) {
+            // set the owning side to null (unless already changed)
+            if ($offreEmploi->getUser() === $this) {
+                $offreEmploi->setUser(null);
             }
         }
 
