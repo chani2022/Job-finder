@@ -1,3 +1,7 @@
 App\Entity\Category:
   category_unique:
     nom_category: 'unique'
+  category_{1..10}:
+    nom_category: <sentences(1,4)>
+    
+  

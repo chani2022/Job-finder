@@ -23,66 +23,75 @@ class PostAbonnementControllerTest extends ApiTestCase
         $this->loadFixturesTrait();
     }
 
-    public function testUniqueNomCategory(): void
+    public function testPostAbonnement(): void
     {
-        $this->myLogUser();
+        $user = $this->all_fixtures['user_adm_society'];
+        $this->client->loginUser($user);
 
-        $this->client->request('POST', '/api/categories', [
+        $this->client->request('POST', '/api/abonnements', [
             "json" => [
-                'nom_category' => 'unique'
+                'user' => '/api/users/' . $user->getId(),
+                'category' => [
+                    '/api/categories/1',
+                    '/api/categories/2'
+                ]
             ]
         ]);
 
-        $this->assertResponseStatusCodeSame(422);
+        $this->assertResponseIsSuccessful();
     }
 
-    public function testNotBlankNomCategory(): void
-    {
-        $this->myLogUser();
 
-        $this->client->request('POST', '/api/categories', [
-            "json" => [
-                'nom_category' => ''
-            ]
-        ]);
-
-        $this->assertResponseStatusCodeSame(422);
-    }
 
     /**
      * @dataProvider getUserAuthorized
      */
-    public function testPostCategoryAuthorized(?string $roles, bool $access): void
-    {
-        /** @var User */
-        $user = $this->getUser($roles);
-        if ($user) {
-            $this->client->loginUser($user);
-        }
-        $this->client->request('POST', '/api/categories', [
-            "json" => [
-                "nom_category" => "symfony"
-            ]
-        ]);
+    // public function testNotBlankNomCategory($roles): void
+    // {
+    //     $user = $this->getUser($roles);
+    //     $this->myLogUser();
 
-        if ($access) {
-            $this->assertResponseIsSuccessful();
-        } else {
-            $status = 403;
-            if (!$roles) {
-                $status = 401;
-            }
+    //     $this->client->request('POST', '/api/categories', [
+    //         "json" => [
+    //             'user' => $user
+    //         ]
+    //     ]);
 
-            $this->assertResponseStatusCodeSame($status);
-        }
-    }
+    //     $this->assertResponseStatusCodeSame(422);
+    // }
+
+    /**
+     * @dataProvider getUserAuthorized
+     */
+    // public function testPostCategoryAuthorized(?string $roles, bool $access): void
+    // {
+    //     /** @var User */
+    //     $user = $this->getUser($roles);
+    //     if ($user) {
+    //         $this->client->loginUser($user);
+    //     }
+    //     $this->client->request('POST', '/api/categories', [
+    //         "json" => [
+    //             "nom_category" => "symfony"
+    //         ]
+    //     ]);
+
+    //     if ($access) {
+    //         $this->assertResponseIsSuccessful();
+    //     } else {
+    //         $status = 403;
+    //         if (!$roles) {
+    //             $status = 401;
+    //         }
+
+    //         $this->assertResponseStatusCodeSame($status);
+    //     }
+    // }
 
     public static function getUserAuthorized(): array
     {
         return [
-            'super' => ['roles' => 'super', 'access' => true],
-            'admin' => ['roles' => 'admin', 'access' => false],
-            'user' => ['roles' => 'user', 'access' => false],
+            'user' => ['roles' => 'user', 'access' => true],
             'anonymous' => ['roles' => null, 'access' => false]
         ];
     }

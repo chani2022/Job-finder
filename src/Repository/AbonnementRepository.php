@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Abonnement;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,6 +15,27 @@ class AbonnementRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Abonnement::class);
+    }
+
+    public function findAbonnementsOwner(User $user): array
+    {
+        return $this->createQueryBuilder('a')
+            // ->addSelect(['cat'])
+            ->join('a.category', 'cat')
+            ->where('a.user = :user')
+            ->setParameter('user', $user)
+            ->orderBy('cat.nom_category', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findAllAbonnements(): array
+    {
+        return $this->createQueryBuilder('a')
+            ->join('a.category', 'cat')
+            ->orderBy('cat.nom_category', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 
     //    /**

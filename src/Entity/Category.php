@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use App\Repository\CategoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -25,7 +26,8 @@ use Symfony\Component\Validator\Constraints\NotBlank;
             security: 'is_granted("ROLE_SUPER_ADMIN")',
             denormalizationContext: ['groups' => 'post:create:category'],
             validationContext: ['groups' => 'post:create:validator']
-        )
+        ),
+        new Get()
     ]
 )]
 #[UniqueEntity(fields: ['nom_category'], groups: ['post:create:validator'])]
@@ -35,13 +37,13 @@ class Category
     #[ORM\GeneratedValue]
     #[
         ORM\Column,
-        Groups(['read:get:category', 'read:collection:category', 'read:get:secteurActivite', 'read:collection:secteurActivite'])
+        Groups(['read:get:category', 'read:collection:category', 'read:get:secteurActivite', 'read:collection:secteurActivite', 'read:collection:abonnement'])
     ]
     private ?int $id = null;
 
     #[
         ORM\Column(length: 255),
-        Groups(['read:get:category', 'read:collection:category', 'post:create:category', 'read:get:secteurActivite', 'read:collection:secteurActivite']),
+        Groups(['read:get:category', 'read:collection:category', 'post:create:category', 'read:get:secteurActivite', 'read:collection:secteurActivite', 'read:collection:abonnement']),
         NotBlank(groups: ['post:create:validator'])
     ]
     private ?string $nom_category = null;

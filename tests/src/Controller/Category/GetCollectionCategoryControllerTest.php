@@ -33,7 +33,7 @@ class GetCollectionCategoryControllerTest extends ApiTestCase
         if ($user) {
             $this->client->loginUser($user);
         }
-        $this->client->request('GET', '/api/categories');
+        $response = $this->client->request('GET', '/api/categories');
 
         if ($access) {
             $this->assertResponseIsSuccessful();

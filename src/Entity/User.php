@@ -40,7 +40,13 @@ use Symfony\Component\Security\Core\Validator\Constraints as SecurityAssert;
     outputFormats: [
         'jsonld' => ['application/ld+json'],
     ],
-    normalizationContext: ["groups" => ["read:user:get", "read:user:collection"], 'skip_null_values' => false],
+    normalizationContext: [
+        "groups" => [
+            "read:user:get",
+            "read:user:collection"
+        ],
+        'skip_null_values' => false
+    ],
     denormalizationContext: ["groups" => ["write:user"]],
     operations: [
         new GetCollection(
@@ -154,13 +160,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     #[ORM\GeneratedValue]
     #[
         ORM\Column,
-        Groups(["read:user:get", "read:user:collection", "read:society:get", "read:society:collection", "read:society:get", "read:society:collection"])
+        Groups([
+            "read:user:get",
+            "read:user:collection",
+            "read:society:get",
+            "read:society:collection",
+            "read:society:get",
+            "read:society:collection",
+            'read:collection:abonnement'
+        ])
     ]
     private ?int $id = null;
 
     #[
         ORM\Column(length: 180),
-        Groups(["read:user:get", "read:user:collection", "post:create:user", "read:society:get", "read:society:collection"]),
+        Groups([
+            "read:user:get",
+            "read:user:collection",
+            "post:create:user",
+            "read:society:get",
+            "read:society:collection",
+            'read:collection:abonnement'
+        ]),
         Assert\NotBlank(groups: ["post:create:validator", "profil:validator"]),
         Assert\Email(groups: ["post:create:validator", "profil:validator"])
     ]
@@ -186,14 +207,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
 
     #[
         ORM\Column(length: 255, nullable: true),
-        Groups(["read:user:get", "read:user:collection"]),
+        Groups([
+            "read:user:get",
+            "read:user:collection",
+            'read:collection:abonnement'
+        ]),
         Assert\NotBlank(groups: ["profil:validator"])
     ]
     private ?string $nom = null;
 
     #[
         ORM\Column(length: 255, nullable: true),
-        Groups(["read:user:get", "read:user:collection", "read:society:get", "read:society:collection"]),
+        Groups([
+            "read:user:get",
+            "read:user:collection",
+            "read:society:get",
+            "read:society:collection",
+            'read:collection:abonnement'
+        ]),
         Assert\NotBlank(groups: ["profil:validator"])
     ]
     private ?string $prenom = null;
@@ -224,7 +255,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     public ?string $confirmationPassword = null;
 
     #[
-        Groups(["read:user:get", "read:user:collection", "post:create:user", "read:society:get", "read:society:collection"]),
+        Groups([
+            "read:user:get",
+            "read:user:collection",
+            "post:create:user",
+            "read:society:get",
+            "read:society:collection",
+            'read:collection:abonnement'
+        ]),
         ORM\Column(length: 255),
         Assert\NotBlank(groups: ["post:create:validator", "profil:validator"]),
     ]
@@ -234,7 +272,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     #[ORM\JoinColumn(nullable: true)]
     #[ApiProperty(types: ['https://schema.org/image'])]
     #[
-        Groups(["read:user:get", "read:user:collection"])
+        Groups([
+            "read:user:get",
+            "read:user:collection",
+            'read:collection:abonnement'
+        ])
     ]
     public ?MediaObject $image = null;
 
