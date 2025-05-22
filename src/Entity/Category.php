@@ -16,7 +16,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 
 #[ORM\Entity(repositoryClass: CategoryRepository::class)]
 #[ApiResource(
-    denormalizationContext: ['groups' => ['write:post']],
+    denormalizationContext: ['groups' => ['write:category']],
     normalizationContext: ['groups' => ['read:get:category', 'read:collection:category']],
     operations: [
         new GetCollection(

@@ -151,9 +151,8 @@ use Symfony\Component\Security\Core\Validator\Constraints as SecurityAssert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email', "username"])]
-#[UniqueEntity(fields: ["email"], groups: ["post:create:validator", "profil:validator"])]
+#[UniqueEntity(fields: ['email'], groups: ["post:create:validator", "profil:validator"])]
 #[UniqueEntity(fields: ["username"], groups: ["post:create:validator", "profil:validator"])]
-// #[ApiFilter()]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUserInterface
 {
     #[ORM\Id]

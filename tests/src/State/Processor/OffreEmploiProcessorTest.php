@@ -11,6 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 
@@ -40,19 +41,22 @@ class OffreEmploiProcessorTest extends KernelTestCase
 
         $em = $this->getContainer()->get(EntityManagerInterface::class);
 
-        /** @var User */
+        /** @var User|null */
         $user = $this->getUser($roles);
         $tokenStorage = new TokenStorage();
         if ($user) {
             $token = new UsernamePasswordToken($user, 'api', $user->getRoles());
             $tokenStorage->setToken($token);
-        }
-        if (!$access) {
-            $this->expectException(UnauthorizedHttpException::class);
+            if (!$access) {
+                $this->expectException(UnauthorizedHttpException::class);
+            }
         } else {
-            $offreEmploiProcessor = new OffreEmploiProcessor($tokenStorage, $em);
-            $res = $offreEmploiProcessor->process($data, $operation, $uriVariables, $context);
+            $this->expectException(UnauthorizedHttpException::class);
+        }
 
+        $offreEmploiProcessor = new OffreEmploiProcessor($tokenStorage, $em);
+        $res = $offreEmploiProcessor->process($data, $operation, $uriVariables, $context);
+        if ($access) {
             $this->assertEquals($data->getId(), $res->getId());
             $this->assertEquals($data->getUser(), $res->getUser());
             $this->assertEquals($data->getDateCreatedAt(), $res->getDateCreatedAt());
@@ -74,7 +78,7 @@ class OffreEmploiProcessorTest extends KernelTestCase
         /** @var User */
         $user = match ($roles) {
             'super' => $this->all_fixtures['super'],
-            'admin' => $this->all_fixtures['admin'],
+            'admin' => $this->all_fixtures['admin_adm_society'],
             'user' => $this->all_fixtures['user_1'],
             default => null
         };

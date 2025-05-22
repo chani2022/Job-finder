@@ -6,16 +6,22 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use App\Repository\OffreEmploiRepository;
+use App\State\Processor\OffreEmploiProcessor;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 #[ORM\Entity(repositoryClass: OffreEmploiRepository::class)]
 #[ApiResource(
+    denormalizationContext: ['groups' => 'write:offre'],
     operations: [
         new GetCollection(),
         new Post(
-            security: 'is_granted("ROLE_ADMIN")'
+            denormalizationContext: ['groups' => 'post:create:offre'],
+            validationContext: ['groups' => ['post:create:validator']],
+            processor: OffreEmploiProcessor::class
         )
     ]
 )]
@@ -26,28 +32,59 @@ class OffreEmploi
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[
+        ORM\Column(length: 255),
+        Groups(['post:create:offre']),
+        NotBlank(groups: ['post:create:validator'])
+    ]
     private ?string $titre = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[
+        ORM\Column(type: Types::TEXT),
+        Groups(['post:create:offre']),
+        NotBlank(groups: ['post:create:validator'])
+    ]
     private ?string $description = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $date_created_at = null;
 
-    #[ORM\Column(nullable: true)]
+    #[
+        ORM\Column(nullable: true),
+        Groups(['post:create:offre'])
+    ]
     private ?\DateTimeImmutable $date_expired_at = null;
 
-    #[ORM\ManyToOne(inversedBy: 'offreEmplois')]
+    #[
+        ORM\ManyToOne(inversedBy: 'offreEmplois'),
+        Groups([
+            'post:create:offre'
+        ])
+    ]
     private ?TypeContrat $typeContrat = null;
 
-    #[ORM\ManyToOne(inversedBy: 'offreEmplois')]
+    #[
+        ORM\ManyToOne(inversedBy: 'offreEmplois'),
+        Groups([
+            'post:create:offre'
+        ])
+    ]
     private ?SecteurActivite $secteurActivite = null;
 
-    #[ORM\ManyToOne(inversedBy: 'offreEmplois')]
+    #[
+        ORM\ManyToOne(inversedBy: 'offreEmplois'),
+        Groups([
+            'post:create:offre'
+        ])
+    ]
     private ?NiveauEtude $niveauEtude = null;
 
-    #[ORM\ManyToOne(inversedBy: 'offreEmplois')]
+    #[
+        ORM\ManyToOne(inversedBy: 'offreEmplois'),
+        Groups([
+            'post:create:offre'
+        ])
+    ]
     private ?Experience $experience = null;
 
     #[ORM\ManyToOne(inversedBy: 'offreEmplois')]

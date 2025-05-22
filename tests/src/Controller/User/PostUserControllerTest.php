@@ -74,35 +74,35 @@ class PostUserControllerTest extends ApiTestCase
     /**
      * @dataProvider getUniqueProps
      */
-    public function testUniqueProps(string $uniqueProps, string $value): void
+    public function testUniquePropsUser(string $username, string $email, string $unique_props): void
     {
         $json = [
-            'username' => 'test',
-            'email' => 'test@test.com',
-            'plainPassword' => 'test',
+            'username' => $username,
+            'email' => $email,
+            'password' => 'test',
             'confirmationPassword' => 'test'
         ];
-        if ($uniqueProps == "username") {
-            $json["username"] = $value;
-        } else {
-            $json['email'] = $value;
-        }
 
         /** @var Response $response */
-        $response = $this->client->request(Request::METHOD_POST, "/api/users", [
+        $response = $this->client->request('POST', "/api/users", [
             'json' => $json
         ]);
 
-        $this->assertResponseStatusCodeSame(HttpFoundationResponse::HTTP_UNPROCESSABLE_ENTITY);
+        $this->assertResponseStatusCodeSame(422);
+        $excepted = 1;
+        if ($unique_props == "username email") {
+            $excepted = 2;
+        }
 
-        $this->assertCount(2, json_decode($response->getBrowserKitResponse()->getContent(), true)['violations']);
+        $this->assertCount($excepted, $response->getBrowserKitResponse()->toArray()['violations']);
     }
 
     public static function getUniqueProps(): array
     {
         return [
-            ["username", "test"],
-            ["email", "test@test.com"]
+            "unique_username" => ["username" => "unique", "email" => "other@gmail.com", "unique_props" => "username"],
+            "unique_email" => ["username" => "abcde", "email" => "unique@test.com", "unique_props" => "email"],
+            "unique_username_email" => ["username" => "unique", "email" => "unique@test.com", "unique_props" => "username email"]
         ];
     }
 

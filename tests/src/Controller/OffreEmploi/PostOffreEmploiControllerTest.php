@@ -26,43 +26,91 @@ class PostOffreEmploiControllerTest extends ApiTestCase
     /**
      * @dataProvider getUserAuthorized
      */
-    public function testPostOffre(?string $roles, bool $access): void
+    public function testPostOffre(?string $roles, bool $access, array $data): void
     {
         $user = $this->getUser($roles);
         if ($user) {
             $this->client->loginUser($user);
+            $data['titre'] .= $user->getId();
+            $data['description'] .= $user->getId();
         }
 
         $this->client->request('POST', '/api/offre_emplois', [
-            "json" => [
-                "titre" => "mon titre " . $user?->getId(),
-                "description" => "mon description " . $user?->getId(),
-                "date_expired_at" => '2025-06-22',
-                "typeContrat" => '/api/type_contrats/1',
-                'secteurActivite' => '/api/secteur_activites/1',
-                'niveauEtude' => '/api/niveau_etudes/1',
-                'experience' => '/api/experiences/1'
-            ]
+            "json" => $data
         ]);
         if ($access) {
             $this->assertResponseStatusCodeSame(201);
         } else {
-            $status = 401;
-            if ($roles) {
-                $status = 403;
-            }
-
-            $this->assertResponseStatusCodeSame($status);
+            $this->assertResponseStatusCodeSame(401);
         }
+    }
+
+    /**
+     * @dataProvider getDataInvalid
+     */
+    public function testPostOffreInvalid(array $data): void
+    {
+        $admin = $this->all_fixtures['admin'];
+        $this->client->loginUser($admin);
+
+        $this->client->request('POST', '/api/offre_emplois', [
+            'json' => $data
+        ]);
+
+        $this->assertResponseStatusCodeSame(422);
+    }
+
+    public static function getDataInvalid(): array
+    {
+        return [
+            'data' => [
+                [
+                    "titre" => "",
+                    "description" => "",
+                    "date_expired_at" => '2025-06-22',
+                    "typeContrat" => '/api/type_contrats/1',
+                    'secteurActivite' => '/api/secteur_activites/1',
+                    'niveauEtude' => '/api/niveau_etudes/1',
+                    'experience' => '/api/experiences/1'
+                ]
+            ]
+        ];
     }
 
     public static function getUserAuthorized(): array
     {
         return [
-            'super' => ['roles' => 'super', 'access' => true],
-            'admin' => ['roles' => 'admin', 'access' => true],
-            'user' => ['roles' => 'user', 'access' => false],
-            'anonymous' => ['roles' => null, 'access' => false]
+            'super' => ['roles' => 'super', 'access' => true, 'data' => [
+                "titre" => "mon titre ",
+                "description" => "mon description ",
+                "date_expired_at" => '2025-06-22',
+                "typeContrat" => '/api/type_contrats/1',
+                'secteurActivite' => '/api/secteur_activites/1',
+                'niveauEtude' => '/api/niveau_etudes/1',
+                'experience' => '/api/experiences/1'
+            ]],
+            'admin' => ['roles' => 'admin', 'access' => true, 'data' => [
+                "titre" => "mon titre ",
+                "description" => "mon description "
+            ]],
+            'user' => ['roles' => 'user', 'access' => false, 'data' => [
+                "titre" => "mon titre ",
+                "description" => "mon description ",
+                "date_expired_at" => '2025-06-22',
+                "typeContrat" => '/api/type_contrats/1',
+                'secteurActivite' => '/api/secteur_activites/1',
+                'niveauEtude' => '/api/niveau_etudes/1',
+                'experience' => '/api/experiences/1'
+            ]],
+            'anonymous' => ['roles' => null, 'access' => false, 'data' => [
+                "titre" => "mon titre ",
+                "description" => "mon description ",
+                "date_expired_at" => '2025-06-22',
+                "typeContrat" => '/api/type_contrats/1',
+                'secteurActivite' => '/api/secteur_activites/1',
+                'niveauEtude' => '/api/niveau_etudes/1',
+                'experience' => '/api/experiences/1'
+            ]]
         ];
     }
 
