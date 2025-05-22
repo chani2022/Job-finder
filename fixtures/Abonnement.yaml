@@ -7,3 +7,4 @@ App\Entity\Abonnement:
     user: '@user_activate_society'
     category: ['@category_unique', '@category_*']
     
+    

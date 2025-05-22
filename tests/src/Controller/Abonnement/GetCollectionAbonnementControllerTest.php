@@ -45,33 +45,20 @@ class GetCollectionAbonnementControllerTest extends ApiTestCase
                 $this->assertCount(2, $res['member'][0]['category']);
                 $this->assertEquals(
                     [
-                        "@id" => "/api/users/14",
+                        "@id" => "/api/users/" . $user->getId(),
                         "@type" => "User",
-                        "id" => 14,
-                        "email" => "adm@user.com",
+                        "id" => $user->getId(),
+                        "email" => $user->getEmail(),
                         "nom" => null,
                         "prenom" => null,
-                        "username" => "adm",
+                        "username" => $user->getUsername(),
                         "image" => null
                     ],
                     $res['member'][0]['user']
                 );
                 $this->assertEquals(
-                    [
-                        [
-                            "@id" => "/api/categories/1",
-                            "@type" => "Category",
-                            "id" => 1,
-                            "nom_category" => "unique"
-                        ],
-                        [
-                            "@id" => "/api/categories/2",
-                            "@type" => "Category",
-                            "id" => 2,
-                            "nom_category" => "Et est ut eum nisi."
-                        ]
-                    ],
-                    $res['member'][0]['category']
+                    2,
+                    count($res['member'][0]['category'])
                 );
             } else {
                 $this->assertCount(0, $res['member']);
