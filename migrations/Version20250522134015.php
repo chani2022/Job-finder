@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250521101619 extends AbstractMigration
+final class Version20250522134015 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -21,7 +21,16 @@ final class Version20250521101619 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         // $this->addSql(<<<'SQL'
-        //     CREATE TABLE offre_emploi (id INT AUTO_INCREMENT NOT NULL, type_contrat_id INT DEFAULT NULL, secteur_activite_id INT DEFAULT NULL, niveau_etude_id INT DEFAULT NULL, experience_id INT DEFAULT NULL, user_id INT NOT NULL, titre VARCHAR(255) NOT NULL, description LONGTEXT NOT NULL, date_created_at DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', date_expired_at DATETIME DEFAULT NULL COMMENT '(DC2Type:datetime_immutable)', INDEX IDX_132AD0D1520D03A (type_contrat_id), INDEX IDX_132AD0D15233A7FC (secteur_activite_id), INDEX IDX_132AD0D1FEAD13D1 (niveau_etude_id), INDEX IDX_132AD0D146E90E27 (experience_id), INDEX IDX_132AD0D1A76ED395 (user_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
+        //     CREATE TABLE notification (id INT AUTO_INCREMENT NOT NULL, user_id INT NOT NULL, offre_emploi_id INT NOT NULL, is_read TINYINT(1) NOT NULL, INDEX IDX_BF5476CAA76ED395 (user_id), INDEX IDX_BF5476CAB08996ED (offre_emploi_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
+        // SQL);
+        // // $this->addSql(<<<'SQL'
+        // //     CREATE TABLE offre_emploi (id INT AUTO_INCREMENT NOT NULL, type_contrat_id INT DEFAULT NULL, secteur_activite_id INT DEFAULT NULL, niveau_etude_id INT DEFAULT NULL, experience_id INT DEFAULT NULL, user_id INT NOT NULL, titre VARCHAR(255) NOT NULL, description LONGTEXT NOT NULL, date_created_at DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', date_expired_at DATETIME DEFAULT NULL COMMENT '(DC2Type:datetime_immutable)', INDEX IDX_132AD0D1520D03A (type_contrat_id), INDEX IDX_132AD0D15233A7FC (secteur_activite_id), INDEX IDX_132AD0D1FEAD13D1 (niveau_etude_id), INDEX IDX_132AD0D146E90E27 (experience_id), INDEX IDX_132AD0D1A76ED395 (user_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
+        // // SQL);
+        // $this->addSql(<<<'SQL'
+        //     ALTER TABLE notification ADD CONSTRAINT FK_BF5476CAA76ED395 FOREIGN KEY (user_id) REFERENCES user (id)
+        // SQL);
+        // $this->addSql(<<<'SQL'
+        //     ALTER TABLE notification ADD CONSTRAINT FK_BF5476CAB08996ED FOREIGN KEY (offre_emploi_id) REFERENCES offre_emploi (id)
         // SQL);
         // $this->addSql(<<<'SQL'
         //     ALTER TABLE offre_emploi ADD CONSTRAINT FK_132AD0D1520D03A FOREIGN KEY (type_contrat_id) REFERENCES type_contrat (id)
@@ -44,6 +53,12 @@ final class Version20250521101619 extends AbstractMigration
     {
         // this down() migration is auto-generated, please modify it to your needs
         // $this->addSql(<<<'SQL'
+        //     ALTER TABLE notification DROP FOREIGN KEY FK_BF5476CAA76ED395
+        // SQL);
+        // $this->addSql(<<<'SQL'
+        //     ALTER TABLE notification DROP FOREIGN KEY FK_BF5476CAB08996ED
+        // SQL);
+        // $this->addSql(<<<'SQL'
         //     ALTER TABLE offre_emploi DROP FOREIGN KEY FK_132AD0D1520D03A
         // SQL);
         // $this->addSql(<<<'SQL'
@@ -57,6 +72,9 @@ final class Version20250521101619 extends AbstractMigration
         // SQL);
         // $this->addSql(<<<'SQL'
         //     ALTER TABLE offre_emploi DROP FOREIGN KEY FK_132AD0D1A76ED395
+        // SQL);
+        // $this->addSql(<<<'SQL'
+        //     DROP TABLE notification
         // SQL);
         // $this->addSql(<<<'SQL'
         //     DROP TABLE offre_emploi

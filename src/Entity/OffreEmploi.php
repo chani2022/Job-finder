@@ -8,6 +8,8 @@ use ApiPlatform\Metadata\Post;
 use App\Repository\OffreEmploiRepository;
 use App\State\Processor\OffreEmploiProcessor;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -90,6 +92,18 @@ class OffreEmploi
     #[ORM\ManyToOne(inversedBy: 'offreEmplois')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
+
+    /**
+     * @var Collection<int, Notification>
+     */
+    #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'offreEmploi')]
+    private Collection $notifications;
+
+    public function __construct()
+    {
+        $this->date_created_at = new DateTimeImmutable();
+        $this->notifications = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -200,6 +214,36 @@ class OffreEmploi
     public function setUser(?User $user): static
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Notification>
+     */
+    public function getNotifications(): Collection
+    {
+        return $this->notifications;
+    }
+
+    public function addNotification(Notification $notification): static
+    {
+        if (!$this->notifications->contains($notification)) {
+            $this->notifications->add($notification);
+            $notification->setOffreEmploi($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNotification(Notification $notification): static
+    {
+        if ($this->notifications->removeElement($notification)) {
+            // set the owning side to null (unless already changed)
+            if ($notification->getOffreEmploi() === $this) {
+                $notification->setOffreEmploi(null);
+            }
+        }
 
         return $this;
     }

@@ -35,8 +35,8 @@ class OffreEmploiProcessor implements ProcessorInterface
             if (!in_array('ROLE_SUPER_ADMIN', $user->getRoles()) && !in_array('ROLE_ADMIN', $user->getRoles())) {
                 throw new UnauthorizedHttpException(challenge: 'test');
             }
-            $data->setUser($user)
-                ->setDateCreatedAt(new DateTimeImmutable());
+
+            $data->setUser($user);
 
             $this->em->persist($data);
             $this->em->flush();
