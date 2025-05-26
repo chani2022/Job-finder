@@ -1,0 +1,6 @@
+App\Entity\Notification:
+  notification_user_adm_society:
+    user: '@user_adm_society'
+    offreEmploi: '@offre_emploi'
+    is_read: true
+    

@@ -18,6 +18,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 #[ORM\Entity(repositoryClass: OffreEmploiRepository::class)]
 #[ApiResource(
     denormalizationContext: ['groups' => 'write:offre'],
+    normalizationContext: ['groups' => 'read:get:offre', 'read:collection:offre'],
     operations: [
         new GetCollection(),
         new Post(
@@ -31,19 +32,33 @@ class OffreEmploi
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[
+        ORM\Column,
+        Groups([
+            'read:get:offre',
+            'read:collection:offre'
+        ])
+    ]
     private ?int $id = null;
 
     #[
         ORM\Column(length: 255),
-        Groups(['post:create:offre']),
+        Groups([
+            'post:create:offre',
+            'read:get:offre',
+            'read:collection:offre'
+        ]),
         NotBlank(groups: ['post:create:validator'])
     ]
     private ?string $titre = null;
 
     #[
         ORM\Column(type: Types::TEXT),
-        Groups(['post:create:offre']),
+        Groups([
+            'post:create:offre',
+            'read:get:offre',
+            'read:collection:offre'
+        ]),
         NotBlank(groups: ['post:create:validator'])
     ]
     private ?string $description = null;
@@ -53,14 +68,20 @@ class OffreEmploi
 
     #[
         ORM\Column(nullable: true),
-        Groups(['post:create:offre'])
+        Groups([
+            'post:create:offre',
+            'read:get:offre',
+            'read:collection:offre'
+        ])
     ]
     private ?\DateTimeImmutable $date_expired_at = null;
 
     #[
         ORM\ManyToOne(inversedBy: 'offreEmplois'),
         Groups([
-            'post:create:offre'
+            'post:create:offre',
+            'read:get:offre',
+            'read:collection:offre'
         ])
     ]
     private ?TypeContrat $typeContrat = null;
@@ -68,7 +89,9 @@ class OffreEmploi
     #[
         ORM\ManyToOne(inversedBy: 'offreEmplois'),
         Groups([
-            'post:create:offre'
+            'post:create:offre',
+            'read:get:offre',
+            'read:collection:offre'
         ])
     ]
     private ?SecteurActivite $secteurActivite = null;
@@ -76,7 +99,9 @@ class OffreEmploi
     #[
         ORM\ManyToOne(inversedBy: 'offreEmplois'),
         Groups([
-            'post:create:offre'
+            'post:create:offre',
+            'read:get:offre',
+            'read:collection:offre'
         ])
     ]
     private ?NiveauEtude $niveauEtude = null;
@@ -84,7 +109,9 @@ class OffreEmploi
     #[
         ORM\ManyToOne(inversedBy: 'offreEmplois'),
         Groups([
-            'post:create:offre'
+            'post:create:offre',
+            'read:get:offre',
+            'read:collection:offre'
         ])
     ]
     private ?Experience $experience = null;

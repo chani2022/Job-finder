@@ -35,14 +35,25 @@ class Experience
     #[ORM\GeneratedValue]
     #[
         ORM\Column,
-        Groups(['read:get:experience', 'read:collection:experience'])
+        Groups([
+            'read:get:experience',
+            'read:collection:experience',
+            'read:get:offre',
+            'read:collection:offre'
+        ])
     ]
     private ?int $id = null;
 
     #[
         ORM\Column(length: 255),
         NotBlank(['groups' => ['post:create:validator']]),
-        Groups(['read:get:experience', 'read:collection:experience', 'post:create:experience'])
+        Groups([
+            'read:get:experience',
+            'read:collection:experience',
+            'post:create:experience',
+            'read:get:offre',
+            'read:collection:offre'
+        ])
     ]
     private ?string $nombre_experience = null;
 

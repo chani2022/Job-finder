@@ -43,7 +43,16 @@ class Category
 
     #[
         ORM\Column(length: 255),
-        Groups(['read:get:category', 'read:collection:category', 'post:create:category', 'read:get:secteurActivite', 'read:collection:secteurActivite', 'read:collection:abonnement']),
+        Groups([
+            'read:get:category',
+            'read:collection:category',
+            'post:create:category',
+            'read:get:secteurActivite',
+            'read:collection:secteurActivite',
+            'read:collection:abonnement',
+            'read:get:offre',
+            'read:collection:offre'
+        ]),
         NotBlank(groups: ['post:create:validator'])
     ]
     private ?string $nom_category = null;
