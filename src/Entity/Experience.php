@@ -5,7 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
-use App\Repository\NiveauEtudeRepository;
+use App\Repository\ExperienceRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -13,10 +13,10 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
-
+#[ORM\Entity(repositoryClass: ExperienceRepository::class)]
 #[ApiResource(
-    denormalizationContext: ['groups' => 'post:create:niveau_etude'],
-    normalizationContext: ['groups' => ['read:get:niveau_etude', 'read:collection:niveau_etude']],
+    denormalizationContext: ['groups' => 'post:create:experience'],
+    normalizationContext: ['groups' => ['read:get:experience', 'read:collection:experience']],
     operations: [
         new GetCollection(
             security: 'is_granted("ROLE_SUPER_ADMIN")'
@@ -25,32 +25,31 @@ use Symfony\Component\Validator\Constraints\NotBlank;
             security: 'is_granted("ROLE_SUPER_ADMIN")',
             validationContext: ['groups' => ['post:create:validator']]
         )
+
     ]
 )]
-#[ORM\Entity(repositoryClass: NiveauEtudeRepository::class)]
-#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_NIVEAU_ETUDE', fields: ['niveau_etude'])]
-#[UniqueEntity(fields: ["niveau_etude"], groups: ["post:create:validator"])]
-class NiveauEtude
+#[UniqueEntity(fields: ["nombre_experience"], groups: ["post:create:validator"])]
+class Experience
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[
         ORM\Column,
-        Groups(['read:get:niveau_etude', 'read:collection:niveau_etude'])
+        Groups(['read:get:experience', 'read:collection:experience'])
     ]
     private ?int $id = null;
 
     #[
-        ORM\Column(length: 255, unique: true),
-        Groups(['read:get:niveau_etude', 'read:collection:niveau_etude', 'post:create:niveau_etude']),
-        NotBlank(['groups' => ['post:create:validator']])
+        ORM\Column(length: 255),
+        NotBlank(['groups' => ['post:create:validator']]),
+        Groups(['read:get:experience', 'read:collection:experience', 'post:create:experience'])
     ]
-    private ?string $niveau_etude = null;
+    private ?string $nombre_experience = null;
 
     /**
      * @var Collection<int, OffreEmploi>
      */
-    #[ORM\OneToMany(targetEntity: OffreEmploi::class, mappedBy: 'niveauEtude')]
+    #[ORM\OneToMany(targetEntity: OffreEmploi::class, mappedBy: 'experience')]
     private Collection $offreEmplois;
 
     public function __construct()
@@ -63,14 +62,14 @@ class NiveauEtude
         return $this->id;
     }
 
-    public function getNiveauEtude(): ?string
+    public function getNombreExperience(): ?string
     {
-        return $this->niveau_etude;
+        return $this->nombre_experience;
     }
 
-    public function setNiveauEtude(string $niveau_etude): static
+    public function setNombreExperience(string $nombre_experience): static
     {
-        $this->niveau_etude = strtoupper($niveau_etude);
+        $this->nombre_experience = $nombre_experience;
 
         return $this;
     }
@@ -87,7 +86,7 @@ class NiveauEtude
     {
         if (!$this->offreEmplois->contains($offreEmploi)) {
             $this->offreEmplois->add($offreEmploi);
-            $offreEmploi->setNiveauEtude($this);
+            $offreEmploi->setExperience($this);
         }
 
         return $this;
@@ -97,8 +96,8 @@ class NiveauEtude
     {
         if ($this->offreEmplois->removeElement($offreEmploi)) {
             // set the owning side to null (unless already changed)
-            if ($offreEmploi->getNiveauEtude() === $this) {
-                $offreEmploi->setNiveauEtude(null);
+            if ($offreEmploi->getExperience() === $this) {
+                $offreEmploi->setExperience(null);
             }
         }
 

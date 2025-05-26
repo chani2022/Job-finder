@@ -1,0 +1,10 @@
+App\Entity\Abonnement:
+  abonnement_user_adm_society_category_unique:
+    user: '@user_adm_society'
+    category: ['@category_unique', '@category_*']
+
+  abonnement_{1..10}:
+    user: '@user_activate_society'
+    category: ['@category_unique', '@category_*']
+    
+    

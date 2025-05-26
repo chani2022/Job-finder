@@ -5,7 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
-use App\Repository\NiveauEtudeRepository;
+use App\Repository\TypeContratRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -13,44 +13,43 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
-
+#[ORM\Entity(repositoryClass: TypeContratRepository::class)]
 #[ApiResource(
-    denormalizationContext: ['groups' => 'post:create:niveau_etude'],
-    normalizationContext: ['groups' => ['read:get:niveau_etude', 'read:collection:niveau_etude']],
+    denormalizationContext: ['groups' => 'write:create:typeContrat'],
+    normalizationContext: ['groups' => ['read:get:typeContrat', 'read:collection:typeContrat']],
     operations: [
         new GetCollection(
             security: 'is_granted("ROLE_SUPER_ADMIN")'
         ),
         new Post(
             security: 'is_granted("ROLE_SUPER_ADMIN")',
-            validationContext: ['groups' => ['post:create:validator']]
+            validationContext: ['groups' => ['post:create:validator']],
+            denormalizationContext: ['groups' => ['post:create:typeContrat']]
         )
     ]
 )]
-#[ORM\Entity(repositoryClass: NiveauEtudeRepository::class)]
-#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_NIVEAU_ETUDE', fields: ['niveau_etude'])]
-#[UniqueEntity(fields: ["niveau_etude"], groups: ["post:create:validator"])]
-class NiveauEtude
+#[UniqueEntity(fields: ["type_contrat"], groups: ["post:create:validator"])]
+class TypeContrat
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[
         ORM\Column,
-        Groups(['read:get:niveau_etude', 'read:collection:niveau_etude'])
+        Groups(['read:get:typeContrat', 'read:collection:typeContrat']),
     ]
     private ?int $id = null;
 
     #[
-        ORM\Column(length: 255, unique: true),
-        Groups(['read:get:niveau_etude', 'read:collection:niveau_etude', 'post:create:niveau_etude']),
-        NotBlank(['groups' => ['post:create:validator']])
+        ORM\Column(length: 255),
+        NotBlank(['groups' => ['post:create:validator']]),
+        Groups(['read:get:typeContrat', 'read:collection:typeContrat', 'post:create:typeContrat']),
     ]
-    private ?string $niveau_etude = null;
+    private ?string $type_contrat = null;
 
     /**
      * @var Collection<int, OffreEmploi>
      */
-    #[ORM\OneToMany(targetEntity: OffreEmploi::class, mappedBy: 'niveauEtude')]
+    #[ORM\OneToMany(targetEntity: OffreEmploi::class, mappedBy: 'typeContrat')]
     private Collection $offreEmplois;
 
     public function __construct()
@@ -63,14 +62,14 @@ class NiveauEtude
         return $this->id;
     }
 
-    public function getNiveauEtude(): ?string
+    public function getTypeContrat(): ?string
     {
-        return $this->niveau_etude;
+        return $this->type_contrat;
     }
 
-    public function setNiveauEtude(string $niveau_etude): static
+    public function setTypeContrat(string $type_contrat): static
     {
-        $this->niveau_etude = strtoupper($niveau_etude);
+        $this->type_contrat = strtoupper($type_contrat);
 
         return $this;
     }
@@ -87,7 +86,7 @@ class NiveauEtude
     {
         if (!$this->offreEmplois->contains($offreEmploi)) {
             $this->offreEmplois->add($offreEmploi);
-            $offreEmploi->setNiveauEtude($this);
+            $offreEmploi->setTypeContrat($this);
         }
 
         return $this;
@@ -97,8 +96,8 @@ class NiveauEtude
     {
         if ($this->offreEmplois->removeElement($offreEmploi)) {
             // set the owning side to null (unless already changed)
-            if ($offreEmploi->getNiveauEtude() === $this) {
-                $offreEmploi->setNiveauEtude(null);
+            if ($offreEmploi->getTypeContrat() === $this) {
+                $offreEmploi->setTypeContrat(null);
             }
         }
 

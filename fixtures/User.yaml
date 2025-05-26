@@ -6,8 +6,8 @@ App\Entity\User:
         society: '@society*'
 
     user_test_unique_props:
-        email: test@test.com
-        username: test
+        email: unique@test.com
+        username: unique
         password: <hashPassword('test')>
 
     admin:
@@ -57,6 +57,13 @@ App\Entity\User:
     user_activate_society:
         email: activate@admin.com
         username: activate
+        password: <hashPassword('test')>
+        # society: '@unique_society'
+        status: true
+
+    user_login_ok:
+        email: test@test.com
+        username: test
         password: <hashPassword('test')>
         # society: '@unique_society'
         status: true

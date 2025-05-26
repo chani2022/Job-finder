@@ -20,6 +20,8 @@ use App\State\DisabledUserProcessor;
 use App\State\PostUserProcessor;
 use App\State\ProfilUserProcessor;
 use App\State\Provider\User\UserProvider;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -38,7 +40,13 @@ use Symfony\Component\Security\Core\Validator\Constraints as SecurityAssert;
     outputFormats: [
         'jsonld' => ['application/ld+json'],
     ],
-    normalizationContext: ["groups" => ["read:user:get", "read:user:collection"], 'skip_null_values' => false],
+    normalizationContext: [
+        "groups" => [
+            "read:user:get",
+            "read:user:collection"
+        ],
+        'skip_null_values' => false
+    ],
     denormalizationContext: ["groups" => ["write:user"]],
     operations: [
         new GetCollection(
@@ -143,22 +151,36 @@ use Symfony\Component\Security\Core\Validator\Constraints as SecurityAssert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email', "username"])]
-#[UniqueEntity(fields: ["email"], groups: ["post:create:validator", "profil:validator"])]
+#[UniqueEntity(fields: ['email'], groups: ["post:create:validator", "profil:validator"])]
 #[UniqueEntity(fields: ["username"], groups: ["post:create:validator", "profil:validator"])]
-// #[ApiFilter()]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[
         ORM\Column,
-        Groups(["read:user:get", "read:user:collection", "read:society:get", "read:society:collection", "read:society:get", "read:society:collection"])
+        Groups([
+            "read:user:get",
+            "read:user:collection",
+            "read:society:get",
+            "read:society:collection",
+            "read:society:get",
+            "read:society:collection",
+            'read:collection:abonnement'
+        ])
     ]
     private ?int $id = null;
 
     #[
         ORM\Column(length: 180),
-        Groups(["read:user:get", "read:user:collection", "post:create:user", "read:society:get", "read:society:collection"]),
+        Groups([
+            "read:user:get",
+            "read:user:collection",
+            "post:create:user",
+            "read:society:get",
+            "read:society:collection",
+            'read:collection:abonnement'
+        ]),
         Assert\NotBlank(groups: ["post:create:validator", "profil:validator"]),
         Assert\Email(groups: ["post:create:validator", "profil:validator"])
     ]
@@ -184,14 +206,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
 
     #[
         ORM\Column(length: 255, nullable: true),
-        Groups(["read:user:get", "read:user:collection"]),
+        Groups([
+            "read:user:get",
+            "read:user:collection",
+            'read:collection:abonnement'
+        ]),
         Assert\NotBlank(groups: ["profil:validator"])
     ]
     private ?string $nom = null;
 
     #[
         ORM\Column(length: 255, nullable: true),
-        Groups(["read:user:get", "read:user:collection", "read:society:get", "read:society:collection"]),
+        Groups([
+            "read:user:get",
+            "read:user:collection",
+            "read:society:get",
+            "read:society:collection",
+            'read:collection:abonnement'
+        ]),
         Assert\NotBlank(groups: ["profil:validator"])
     ]
     private ?string $prenom = null;
@@ -222,7 +254,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     public ?string $confirmationPassword = null;
 
     #[
-        Groups(["read:user:get", "read:user:collection", "post:create:user", "read:society:get", "read:society:collection"]),
+        Groups([
+            "read:user:get",
+            "read:user:collection",
+            "post:create:user",
+            "read:society:get",
+            "read:society:collection",
+            'read:collection:abonnement'
+        ]),
         ORM\Column(length: 255),
         Assert\NotBlank(groups: ["post:create:validator", "profil:validator"]),
     ]
@@ -232,7 +271,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     #[ORM\JoinColumn(nullable: true)]
     #[ApiProperty(types: ['https://schema.org/image'])]
     #[
-        Groups(["read:user:get", "read:user:collection"])
+        Groups([
+            "read:user:get",
+            "read:user:collection",
+            'read:collection:abonnement'
+        ])
     ]
     public ?MediaObject $image = null;
 
@@ -248,9 +291,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     ]
     private ?Society $society = null;
 
+    /**
+     * @var Collection<int, Abonnement>
+     */
+    #[ORM\OneToMany(targetEntity: Abonnement::class, mappedBy: 'user')]
+    private Collection $abonnements;
+
+    /**
+     * @var Collection<int, OffreEmploi>
+     */
+    #[ORM\OneToMany(targetEntity: OffreEmploi::class, mappedBy: 'user')]
+    private Collection $offreEmplois;
+
+    /**
+     * @var Collection<int, Notification>
+     */
+    #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'user')]
+    private Collection $notifications;
+
     public function __construct()
     {
         $this->status = false;
+        $this->abonnements = new ArrayCollection();
+        $this->offreEmplois = new ArrayCollection();
+        $this->notifications = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -444,6 +508,96 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     public function setSociety(?Society $society): static
     {
         $this->society = $society;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Abonnement>
+     */
+    public function getAbonnements(): Collection
+    {
+        return $this->abonnements;
+    }
+
+    public function addAbonnement(Abonnement $abonnement): static
+    {
+        if (!$this->abonnements->contains($abonnement)) {
+            $this->abonnements->add($abonnement);
+            $abonnement->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAbonnement(Abonnement $abonnement): static
+    {
+        if ($this->abonnements->removeElement($abonnement)) {
+            // set the owning side to null (unless already changed)
+            if ($abonnement->getUser() === $this) {
+                $abonnement->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, OffreEmploi>
+     */
+    public function getOffreEmplois(): Collection
+    {
+        return $this->offreEmplois;
+    }
+
+    public function addOffreEmploi(OffreEmploi $offreEmploi): static
+    {
+        if (!$this->offreEmplois->contains($offreEmploi)) {
+            $this->offreEmplois->add($offreEmploi);
+            $offreEmploi->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOffreEmploi(OffreEmploi $offreEmploi): static
+    {
+        if ($this->offreEmplois->removeElement($offreEmploi)) {
+            // set the owning side to null (unless already changed)
+            if ($offreEmploi->getUser() === $this) {
+                $offreEmploi->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Notification>
+     */
+    public function getNotifications(): Collection
+    {
+        return $this->notifications;
+    }
+
+    public function addNotification(Notification $notification): static
+    {
+        if (!$this->notifications->contains($notification)) {
+            $this->notifications->add($notification);
+            $notification->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNotification(Notification $notification): static
+    {
+        if ($this->notifications->removeElement($notification)) {
+            // set the owning side to null (unless already changed)
+            if ($notification->getUser() === $this) {
+                $notification->setUser(null);
+            }
+        }
 
         return $this;
     }

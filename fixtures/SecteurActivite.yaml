@@ -1,0 +1,4 @@
+App\Entity\SecteurActivite:
+  secteur_unique:
+    type_secteur: 'unique'
+    category: '@category_unique'
