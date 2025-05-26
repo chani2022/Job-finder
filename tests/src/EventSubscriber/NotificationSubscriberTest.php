@@ -9,14 +9,11 @@ use App\Repository\NotificationRepository;
 use App\Traits\FixturesTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
-use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use App\Entity\OffreEmploi;
 use App\Entity\Notification;
 use App\Repository\OffreEmploiRepository;
-use App\Entity\Abonnement;
 use App\Entity\User;
 
 class NotificationSubscriberTest extends KernelTestCase
