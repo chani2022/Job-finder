@@ -4,3 +4,4 @@ App\Entity\OffreEmploi:
     description: <sentences(5,25)>
     secteurActivite: '@secteur_unique'
     user: '@admin_adm_society'
+    

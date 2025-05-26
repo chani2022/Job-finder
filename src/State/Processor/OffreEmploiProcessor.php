@@ -8,13 +8,21 @@ use ApiPlatform\State\ProcessorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use App\Entity\OffreEmploi;
 use App\Entity\User;
-use DateTimeImmutable;
+use App\Event\NotificationEvent;
+use App\EventSubscriber\NotificationSubscriber;
+use App\Repository\AbonnementRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class OffreEmploiProcessor implements ProcessorInterface
 {
-    public function __construct(private TokenStorageInterface $tokenStorage, private EntityManagerInterface $em) {}
+    public function __construct(
+        private TokenStorageInterface $tokenStorage,
+        private EntityManagerInterface $em,
+        private EventDispatcherInterface $eventDispatcher,
+        private AbonnementRepository $abonnementRepository
+    ) {}
     /**
      * @param OffreEmploi $data
      */
@@ -40,6 +48,9 @@ class OffreEmploiProcessor implements ProcessorInterface
 
             $this->em->persist($data);
             $this->em->flush();
+
+            $this->eventDispatcher->addSubscriber(new NotificationSubscriber($this->em));
+            $this->eventDispatcher->dispatch(new NotificationEvent($data, $this->abonnementRepository), NotificationEvent::POST_NOTIFICATION);
         }
 
         return $data;

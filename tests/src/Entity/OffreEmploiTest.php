@@ -4,9 +4,7 @@ namespace App\Tests\src\Entity;
 
 use App\Entity\OffreEmploi;
 use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class OffreEmploiTest extends KernelTestCase
