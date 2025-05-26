@@ -69,6 +69,7 @@ class LoginControllerTest extends ApiTestCase
         ]);
         $infos = $response->getBrowserKitResponse()->toArray();
         $this->assertArrayHasKey("token", $infos);
+        $this->assertArrayHasKey("notifications", $infos);
     }
 
     public function testUserDisabled(): void

@@ -35,14 +35,25 @@ class TypeContrat
     #[ORM\GeneratedValue]
     #[
         ORM\Column,
-        Groups(['read:get:typeContrat', 'read:collection:typeContrat']),
+        Groups([
+            'read:get:typeContrat',
+            'read:collection:typeContrat',
+            'read:get:offre',
+            'read:collection:offre'
+        ]),
     ]
     private ?int $id = null;
 
     #[
         ORM\Column(length: 255),
         NotBlank(['groups' => ['post:create:validator']]),
-        Groups(['read:get:typeContrat', 'read:collection:typeContrat', 'post:create:typeContrat']),
+        Groups([
+            'read:get:typeContrat',
+            'read:collection:typeContrat',
+            'post:create:typeContrat',
+            'read:get:offre',
+            'read:collection:offre'
+        ]),
     ]
     private ?string $type_contrat = null;
 

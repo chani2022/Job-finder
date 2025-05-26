@@ -39,20 +39,35 @@ class SecteurActivite
     #[ORM\GeneratedValue]
     #[
         ORM\Column,
-        Groups(groups: ['read:get:secteurActivite', 'read:collection:secteurActivite'])
+        Groups(groups: [
+            'read:get:secteurActivite',
+            'read:collection:secteurActivite',
+            'read:get:offre',
+            'read:collection:offre'
+        ])
     ]
     private ?int $id = null;
 
     #[
         ORM\Column(length: 255),
         NotBlank(groups: ['post:create:validator']),
-        Groups(groups: ['read:get:secteurActivite', 'read:collection:secteurActivite'])
+        Groups(groups: [
+            'read:get:secteurActivite',
+            'read:collection:secteurActivite',
+            'read:get:offre',
+            'read:collection:offre'
+        ])
     ]
     private ?string $type_secteur = null;
 
     #[
         ORM\ManyToOne(inversedBy: 'secteurActivites'),
-        Groups(groups: ['read:get:secteurActivite', 'read:collection:secteurActivite'])
+        Groups(groups: [
+            'read:get:secteurActivite',
+            'read:collection:secteurActivite',
+            'read:get:offre',
+            'read:collection:offre'
+        ])
     ]
     private ?Category $category = null;
 

@@ -36,13 +36,24 @@ class NiveauEtude
     #[ORM\GeneratedValue]
     #[
         ORM\Column,
-        Groups(['read:get:niveau_etude', 'read:collection:niveau_etude'])
+        Groups([
+            'read:get:niveau_etude',
+            'read:collection:niveau_etude',
+            'read:get:offre',
+            'read:collection:offre'
+        ])
     ]
     private ?int $id = null;
 
     #[
         ORM\Column(length: 255, unique: true),
-        Groups(['read:get:niveau_etude', 'read:collection:niveau_etude', 'post:create:niveau_etude']),
+        Groups([
+            'read:get:niveau_etude',
+            'read:collection:niveau_etude',
+            'post:create:niveau_etude',
+            'read:get:offre',
+            'read:collection:offre'
+        ]),
         NotBlank(['groups' => ['post:create:validator']])
     ]
     private ?string $niveau_etude = null;
