@@ -7,6 +7,10 @@ controllers:
 api_login_check:
     path: /api/login_check
 
+# api_refresh_token:
+#     path: /api/token/refresh
+#     controller: gesdinet.jwtrefreshtoken::refresh
+
 graphql_playground:
   path: /docs/graphql
   controller: api_platform.graphql.action.graphql_playground
