@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use App\Repository\OffreEmploiRepository;
 use App\State\Processor\OffreEmploiProcessor;
@@ -21,6 +22,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
     normalizationContext: ['groups' => 'read:get:offre', 'read:collection:offre'],
     operations: [
         new GetCollection(),
+        new Get(),
         new Post(
             denormalizationContext: ['groups' => 'post:create:offre'],
             validationContext: ['groups' => ['post:create:validator']],
@@ -36,7 +38,9 @@ class OffreEmploi
         ORM\Column,
         Groups([
             'read:get:offre',
-            'read:collection:offre'
+            'read:collection:offre',
+            'read:collection:notification',
+            'read:get:notification'
         ])
     ]
     private ?int $id = null;
@@ -46,7 +50,9 @@ class OffreEmploi
         Groups([
             'post:create:offre',
             'read:get:offre',
-            'read:collection:offre'
+            'read:collection:offre',
+            'read:collection:notification',
+            'read:get:notification'
         ]),
         NotBlank(groups: ['post:create:validator'])
     ]
@@ -57,13 +63,20 @@ class OffreEmploi
         Groups([
             'post:create:offre',
             'read:get:offre',
-            'read:collection:offre'
+            'read:collection:offre',
+            'read:collection:notification',
+            'read:get:notification'
         ]),
         NotBlank(groups: ['post:create:validator'])
     ]
     private ?string $description = null;
 
-    #[ORM\Column]
+    #[
+        ORM\Column,
+        Groups([
+            'read:get:notification'
+        ])
+    ]
     private ?\DateTimeImmutable $date_created_at = null;
 
     #[
@@ -71,7 +84,8 @@ class OffreEmploi
         Groups([
             'post:create:offre',
             'read:get:offre',
-            'read:collection:offre'
+            'read:collection:offre',
+            'read:get:notification'
         ])
     ]
     private ?\DateTimeImmutable $date_expired_at = null;
@@ -81,7 +95,8 @@ class OffreEmploi
         Groups([
             'post:create:offre',
             'read:get:offre',
-            'read:collection:offre'
+            'read:collection:offre',
+            'read:get:notification'
         ])
     ]
     private ?TypeContrat $typeContrat = null;
@@ -91,7 +106,8 @@ class OffreEmploi
         Groups([
             'post:create:offre',
             'read:get:offre',
-            'read:collection:offre'
+            'read:collection:offre',
+            'read:get:notification'
         ])
     ]
     private ?SecteurActivite $secteurActivite = null;
@@ -101,7 +117,8 @@ class OffreEmploi
         Groups([
             'post:create:offre',
             'read:get:offre',
-            'read:collection:offre'
+            'read:collection:offre',
+            'read:get:notification'
         ])
     ]
     private ?NiveauEtude $niveauEtude = null;
@@ -111,7 +128,8 @@ class OffreEmploi
         Groups([
             'post:create:offre',
             'read:get:offre',
-            'read:collection:offre'
+            'read:collection:offre',
+            'read:get:notification'
         ])
     ]
     private ?Experience $experience = null;

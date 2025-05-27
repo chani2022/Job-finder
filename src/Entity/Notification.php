@@ -2,10 +2,21 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
 use App\Repository\NotificationRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: NotificationRepository::class)]
+#[ApiResource(
+    normalizationContext: ['groups' => 'read:get:notification', 'read:collection:notification'],
+    operations: [
+        new Get(
+            security: 'object.user == user'
+        )
+    ]
+)]
 class Notification
 {
     #[ORM\Id]
@@ -14,11 +25,23 @@ class Notification
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'notifications')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[
+        ORM\JoinColumn(nullable: false),
+        Groups([
+            'read:collection:notification',
+            'read:get:notification'
+        ])
+    ]
     private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'notifications')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[
+        ORM\JoinColumn(nullable: false),
+        Groups([
+            'read:collection:notification',
+            'read:get:notification'
+        ])
+    ]
     private ?OffreEmploi $offreEmploi = null;
 
     #[ORM\Column]

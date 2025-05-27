@@ -18,6 +18,7 @@ class GetOffreEmploiControllerTest extends ApiTestCase
     {
         parent::setUp();
         $this->client = $this->createClient();
+        $this->loadFixturesTrait();
     }
 
     public function testGetOffre(): void

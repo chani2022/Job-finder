@@ -23,6 +23,7 @@ class JWTAuthenticationSuccessListener
         $data = $event->getData();
 
         $notifications = $this->notificationRepository->findBy(['user' => $user]);
+
         $data['notifications'] = $notifications;
         $event->setData($data);
     }

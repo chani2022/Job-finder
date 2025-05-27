@@ -69,7 +69,7 @@ class LoginControllerTest extends ApiTestCase
         ]);
         $infos = $response->getBrowserKitResponse()->toArray();
         $this->assertArrayHasKey("token", $infos);
-        $this->assertArrayHasKey("notifications", $infos);
+        // $this->assertArrayHasKey("refresh_token", $infos);
     }
 
     public function testUserDisabled(): void
@@ -126,6 +126,44 @@ class LoginControllerTest extends ApiTestCase
                 ["username" => "test@test.com", "password" => "test"]
             ]
         ];
+    }
+    /**
+     * @dataProvider provideUserHasAbonnement
+     */
+    public function testAuthWithAbonnement(bool $abonnement): void
+    {
+        $user = $this->getUserAuthAbonnement($abonnement);
+        /** @var Response */
+        $response = $this->client->request('POST', '/api/login_check', [
+            'json' => [
+                'username' => $user->getEmail(),
+                'password' => $abonnement ? 'adm' : 'admin'
+            ]
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        if ($abonnement) {
+            $this->assertCount(1, $response->getBrowserKitResponse()->toArray()['notifications']);
+        } else {
+            $this->assertCount(0, $response->getBrowserKitResponse()->toArray()['notifications']);
+        }
+    }
+    public static function provideUserHasAbonnement(): array
+    {
+        return [
+            "user_has_abonnement" => ["abonnement" => true],
+            "user_not_has_abonnement" => ['abonnement' => false]
+        ];
+    }
+
+    public function getUserAuthAbonnement(bool $hasAbonnement): User
+    {
+        $user = match ($hasAbonnement) {
+            true => $this->all_fixtures['user_adm_society'],
+            default => $this->all_fixtures['admin_1']
+        };
+
+        return $user;
     }
 
     protected function tearDown(): void
