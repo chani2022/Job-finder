@@ -74,6 +74,7 @@ services:
             $meili_key: '%meilisearch_api_key%'
             $meili_prefix: '%meilisearch_prefix%'
 
+
     
 
 

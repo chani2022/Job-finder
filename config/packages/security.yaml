@@ -29,18 +29,33 @@ security:
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
             user_checker: App\Security\UserChecker
-        refresh:
-            pattern:  ^/api/token/refresh
-            stateless: true
-            # anonymous: true
+            refresh_jwt:
+                check_path: /api/token/refresh # or, you may use the `api_refresh_token` route name
+            #     custom_authenticators:
+            #         - gesdinet.jwtrefreshtoken.security.refresh_token_authenticator
+
+        # refresh:
+        #     pattern:  ^/api/token/refresh
+        #     stateless: true
+        #     # provider: app_user_provider
+        #     # anonymous: true
+        #     provider: app_user_provider
+        #     custom_authenticators:
+        #         - gesdinet.jwtrefreshtoken.security.refresh_token_authenticator
         api:
             pattern: ^/api/
             stateless: true
             provider: jwt
-            entry_point: jwt
+            # entry_point: jwt
             jwt: ~
-            refresh_jwt:
-                check_path: /api/token/refresh # or, you may use the `api_refresh_token` route name
+            # refresh_jwt:
+            #     check_path: /api/token/refresh # or, you may use the `api_refresh_token` route name
+            #     custom_authenticators:
+            #         - gesdinet.jwtrefreshtoken.security.refresh_token_authenticator
+            #     provider: app_user_provider
+            #     success_handler: gesdinet.jwtrefreshtoken.security.authentication.success_handler
+            #     failure_handler: gesdinet.jwtrefreshtoken.security.authentication.failure_handler
+                # provider: app_user_provider
                 # or if you have more than one user provider
                 # provider: user_provider_name
         
