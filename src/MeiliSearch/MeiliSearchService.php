@@ -21,7 +21,7 @@ class MeiliSearchService
         $this->client = new Client($meili_url, $meili_key);
     }
     /**
-     * @param string $index_name    nom de l'index de la recherche qui est definit dans la config meilisearch e.x: user
+     * @param string $index_name   nom de l'index de la recherche qui est definit dans la config meilisearch e.x: user
      * @param string|null $query
      * @return array
      */

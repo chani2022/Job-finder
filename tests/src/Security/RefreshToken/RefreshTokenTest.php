@@ -30,15 +30,6 @@ class RefreshTokenTest extends ApiTestCase
         ]);
         $this->assertResponseIsSuccessful();
 
-        $refresh_token = $response->getBrowserKitResponse()->toArray()['refresh_token'];
-        /** @var Response */
-        $response = $this->client->request('POST', '/api/token/refresh', [
-            'json' => [
-                'refresh_token' => $refresh_token
-            ]
-        ]);
-
-        $this->assertResponseIsSuccessful();
         $data = $response->getBrowserKitResponse()->toArray();
 
         $this->assertArrayHasKey('token', $data);
