@@ -8,6 +8,7 @@ Une application web moderne de recherche d'emploi développée avec **Symfony** 
 - 👤 Authentification via **OAuth2** (Google, Facebook…)
 - 👤 Vérification d'authentification via **Gmail**
 - 💳 Paiement sécurisé avec **Stripe**
+- 🔔 Notification des abonnés
 - ⚙️ API REST avec **API Platform**
 - 🐳 Déploiement facile via **Docker**
 
