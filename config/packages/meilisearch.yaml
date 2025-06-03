@@ -14,38 +14,18 @@ meilisearch:
             filterableAttributes: ['roles', 'isActive']  # Filtres possibles
             typoTolerance:
                 enabled: true
-                # minWordSizeForTypos:
-                #     oneTypo: 5  # Taille minimale pour 1 faute de frappe
-                #     twoTypos: 6  # Taille minimale pour 2 fautes de frappe
-                disableOnWords: ['nike', 'adidas']  # Ignore les typos pour ces mots
-                disableOnAttributes: ['id', 'email']  # Désactive sur ces champs
+                minWordSizeForTypos:
+                    oneTypo:  5  # Taille minimale pour 1 faute de frappe
+                    twoTypos: 6  # Taille minimale pour 2 fautes de frappe
             sortableAttributes: ['id:desc']           # Tri possible
-            # attributesToHighlight: ['*']
-            # highlightPreTag: '<em>'
-            # highlightPostTag: '</em>'
             rankingRules:                              # Priorités de recherche
                 - words
                 - typo
                 - proximity
                 - sort
-            stopWords: ['le', 'la', 'de']             # Mots ignorés
+            stopWords: ['le', 'la', 'des', 'de', 'aux', 'au']  # Mots ignorés             # Mots ignorés
             synonyms:                                  # Synonymes
                 admin: ['administrator', 'superuser']
-
-        # - name: Mediaobject
-        #   class: App\Entity\MediaObject
-        #   enable_serializer_groups: true
-        #   settings:
-        #     searchableAttributes: ['username', 'email'] # Champs recherchables
-        #     filterableAttributes: ['roles', 'isActive']  # Filtres possibles
-        #     sortableAttributes: ['createdAt']           # Tri possible
-        #     rankingRules:                              # Priorités de recherche
-        #         - words
-        #         - typo
-        #         - proximity
-        #     stopWords: ['le', 'la', 'de']             # Mots ignorés
-        #     synonyms:                                  # Synonymes
-        #         admin: ['administrator', 'superuser']
         
         - name: society
           class: App\Entity\Society
@@ -53,14 +33,29 @@ meilisearch:
           serializer_groups: ["read:society:get", "read:society:collection"]
           settings:
             searchableAttributes: ['nom_society'] # Champs recherchables
-            # filterableAttributes: ['roles', 'isActive']  # Filtres possibles
             sortableAttributes: ['nom_society']           # Tri possible
             rankingRules:                              # Priorités de recherche
                 - words
                 - typo
                 - proximity
             stopWords: ['le', 'la', 'de']             # Mots ignorés
-            synonyms:                                  # Synonymes
-                admin: ['administrator', 'superuser']
+        
+        - name: offre_emploi
+          class: App\Entity\OffreEmploi
+          enable_serializer_groups: true
+          serializer_groups: ['read:get:offre', 'read:collection:offre']
+          settings:
+            searchableAttributes: ['*'] # Champs recherchables
+            sortableAttributes: ['id:desc']           # Tri possible
+            typoTolerance:
+                enabled: true
+                minWordSizeForTypos:
+                    oneTypo:    4  # Taille minimale pour 1 faute de frappe
+                    twoTypos:   4  # Taille minimale pour 2 fautes de frappe
+            rankingRules:                              # Priorités de recherche
+                - words
+                - typo
+                - proximity
+            stopWords: ['le', 'la', 'des', 'de', 'aux', 'au']  # Mots ignorés
 
     nbResults: 200
