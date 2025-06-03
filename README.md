@@ -27,6 +27,7 @@ git clone https://github.com/chani2022/job-finder.git
 cd job-finder
 cp .env.test .env.local
 docker compose up --build -d
+docker exec $(docker ps -qf "name=app") php bin/console meili:create
 ```
 
 ## ♿ Accessibilité
