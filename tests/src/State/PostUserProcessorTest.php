@@ -5,6 +5,7 @@ namespace App\Tests\Src\State;
 use ApiPlatform\Metadata\Post;
 use App\Entity\User;
 use App\Mailer\ServiceMailer;
+use App\MeiliSearch\MeiliSearchService;
 use App\State\PostUserProcessor;
 use Doctrine\ORM\EntityManagerInterface;
 use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
@@ -58,5 +59,12 @@ class PostUserProcessorTest extends KernelTestCase
         $this->assertEmailHeaderSame($email, 'from', $_ENV['GMAIL_SENDER']);
         $this->assertEmailHeaderSame($email, 'to', $user_bdd->getEmail());
         $this->assertEmailSubjectContains($email, 'Confirmation');
+
+        //verification que l'utilisateur est crée dans meili
+        /** @var MeiliSearchService */
+        $meili = static::getContainer()->get(MeiliSearchService::class);
+        $meili->setIndexName('user');
+        $res = $meili->search($user->getUsername());
+        $this->assertEquals(1, count($res['hits']));
     }
 }
