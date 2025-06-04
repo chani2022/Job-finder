@@ -53,6 +53,10 @@ jobs:
       - name: Create indexes meilisearch
         run: |
           docker exec $(docker ps -qf "name=app") php bin/console meili:create
+      
+      - name: Add primary key meilisearch
+        run: |
+          docker exec $(docker ps -qf "name=app") php bin/console meili:add-primaryKey
 
       - name: Check schema doctrine
         run: |

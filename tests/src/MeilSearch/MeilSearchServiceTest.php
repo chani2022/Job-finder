@@ -76,7 +76,7 @@ class MeilSearchServiceTest extends KernelTestCase
             'invalid' => ['is_valid' => false, 'index_name' => 'other'],
             'user_index_valid' => ['is_valid' => true, 'index_name' => 'user'],
             'society_index_valid' => ['is_valid' => true, 'index_name' => 'society'],
-            'offre_emploi_index_valid' => ['is_valid' => true, 'index_name' => 'offre_emploi'],
+            'offre_emploi_index_valid' => ['is_valid' => true, 'index_name' => 'offreEmploi'],
 
         ];
     }
