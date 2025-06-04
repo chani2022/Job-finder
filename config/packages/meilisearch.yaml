@@ -15,8 +15,8 @@ meilisearch:
             typoTolerance:
                 enabled: true
                 minWordSizeForTypos:
-                    oneTypo:  5  # Taille minimale pour 1 faute de frappe
-                    twoTypos: 6  # Taille minimale pour 2 fautes de frappe
+                    oneTypo:  3  # Taille minimale pour 1 faute de frappe
+                    twoTypos: 3  # Taille minimale pour 2 fautes de frappe
             sortableAttributes: ['id:desc']           # Tri possible
             rankingRules:                              # Priorités de recherche
                 - words
@@ -40,7 +40,7 @@ meilisearch:
                 - proximity
             stopWords: ['le', 'la', 'de']             # Mots ignorés
         
-        - name: offre_emploi
+        - name: offreEmploi
           class: App\Entity\OffreEmploi
           enable_serializer_groups: true
           serializer_groups: ['read:get:offre', 'read:collection:offre']
@@ -50,8 +50,8 @@ meilisearch:
             typoTolerance:
                 enabled: true
                 minWordSizeForTypos:
-                    oneTypo:    4  # Taille minimale pour 1 faute de frappe
-                    twoTypos:   4  # Taille minimale pour 2 fautes de frappe
+                    oneTypo:    3  # Taille minimale pour 1 faute de frappe
+                    twoTypos:   3  # Taille minimale pour 2 fautes de frappe
             rankingRules:                              # Priorités de recherche
                 - words
                 - typo

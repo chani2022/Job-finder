@@ -6,6 +6,7 @@ use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use ApiPlatform\Symfony\Bundle\Test\Client;
 use ApiPlatform\Symfony\Bundle\Test\Response;
 use App\Entity\User;
+use App\MeiliSearch\MeiliSearchService;
 use Doctrine\ORM\EntityManagerInterface;
 use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
 use Symfony\Component\HttpFoundation\Request;
@@ -67,9 +68,9 @@ class PostUserControllerTest extends ApiTestCase
 
         /** @var User $user */
         $user = $this->em->getRepository(User::class)->findOneBy([
-            "username" => "test"
+            "username" => 'myusername'
         ]);
-        $this->assertEquals('test', $user->getUsername());
+        $this->assertEquals('myusername', $user->getUsername());
     }
     /**
      * @dataProvider getUniqueProps
