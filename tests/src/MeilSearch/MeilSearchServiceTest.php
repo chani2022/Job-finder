@@ -37,16 +37,21 @@ class MeilSearchServiceTest extends KernelTestCase
     public function testSearchMeili(?string $index_name): void
     {
         if ($index_name) {
-            $this->meilSearchService->setIndexName('user');
+            $this->meilSearchService->setIndexName($index_name);
         } else {
             $this->expectException(Exception::class);
         }
-        $hits = $this->meilSearchService->search('test');
-        $this->assertCount(count($hits), $hits);
-        foreach ($hits as $hit) {
-            foreach ($hit as $h) {
-                $this->assertStringContainsString("<em>", $h['_formatted']['email']);
-            }
+        $query = $index_name == 'user' ? 'test' : 'unique';
+        $hits = $this->meilSearchService->search($query);
+        switch ($index_name) {
+            case 'offreEmploi':
+                $this->assertStringContainsString("<em>", $hits['hits'][0]['_formatted']['secteurActivite']['type_secteur']);
+                $this->assertStringContainsString("<em>", $hits['hits'][0]['_formatted']['secteurActivite']['category']['nom_category']);
+                break;
+            case 'user':
+                $this->assertStringContainsString("<em>", $hits['hits'][0]['_formatted']['email']);
+            default:
+                break;
         }
     }
 
@@ -84,7 +89,8 @@ class MeilSearchServiceTest extends KernelTestCase
     public static function getIndexForSearch(): array
     {
         return [
-            'with_index' => ['index_name' => 'user'],
+            'with_index_user' => ['index_name' => 'user'],
+            'with_index_offreEmploi' => ['index_name' => 'offreEmploi'],
             'without_index' => ['index_name' => null]
         ];
     }

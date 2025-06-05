@@ -17,15 +17,16 @@ meilisearch:
                 minWordSizeForTypos:
                     oneTypo:  3  # Taille minimale pour 1 faute de frappe
                     twoTypos: 3  # Taille minimale pour 2 fautes de frappe
-            sortableAttributes: ['id:desc']           # Tri possible
+            sortableAttributes: ['id']        # Tri possible
             rankingRules:                              # Priorités de recherche
+                - sort
+                - exactness
                 - words
                 - typo
                 - proximity
-                - sort
-            stopWords: ['le', 'la', 'des', 'de', 'aux', 'au']  # Mots ignorés             # Mots ignorés
-            synonyms:                                  # Synonymes
-                admin: ['administrator', 'superuser']
+            # stopWords: ['le', 'la', 'des', 'de', 'aux', 'au']  # Mots ignorés             # Mots ignorés
+            # synonyms:                                  # Synonymes
+            #     admin: ['administrator', 'superuser']
         
         - name: society
           class: App\Entity\Society
@@ -45,14 +46,16 @@ meilisearch:
           enable_serializer_groups: true
           serializer_groups: ['read:get:offre', 'read:collection:offre']
           settings:
-            searchableAttributes: ['*'] # Champs recherchables
-            sortableAttributes: ['id:desc']           # Tri possible
+            searchableAttributes: ['*']  # Champs recherchables
+            sortableAttributes: ['date_created_at']           # Tri possible
             typoTolerance:
                 enabled: true
                 minWordSizeForTypos:
                     oneTypo:    3  # Taille minimale pour 1 faute de frappe
                     twoTypos:   3  # Taille minimale pour 2 fautes de frappe
             rankingRules:                              # Priorités de recherche
+                - sort
+                - exactness
                 - words
                 - typo
                 - proximity

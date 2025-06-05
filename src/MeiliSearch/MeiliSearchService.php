@@ -11,6 +11,7 @@ class MeiliSearchService
 {
     protected Client $client;
     protected ?string $index_name;
+    protected array $options;
 
     /**
      * @param string $meili_url
@@ -24,6 +25,11 @@ class MeiliSearchService
     ) {
         $this->client = new Client($meili_url, $meili_key);
         $this->index_name = null;
+        $this->options = [
+            'attributesToHighlight' => ['*'],
+            'highlightPreTag' => '<em>',
+            'highlightPostTag' => '</em>'
+        ];
     }
 
     /**
@@ -36,12 +42,10 @@ class MeiliSearchService
         if (is_null($this->index_name)) {
             throw new Exception("Vous devez appeler la methode setIndexName avant de faire la recherche sur meili");
         }
+
+        $this->applySortable();
         $index = $this->client->index($this->meili_prefix . '' . $this->index_name);
-        return $index->search($query, [
-            'attributesToHighlight' => ['*'],
-            'highlightPreTag' => '<em>',
-            'highlightPostTag' => '</em>'
-        ])->getRaw();
+        return $index->search($query, $this->options)->getRaw();
     }
 
     public function getIndexNames(): array
@@ -51,16 +55,30 @@ class MeiliSearchService
 
         return array_map(fn($index) => $index->getUid(), $indexes->getResults());
     }
+
+    public function getIndexName(): string
+    {
+        return $this->index_name;
+    }
     /**
      * @return void|InvalidArgumentException
      */
     public function setIndexName(string $index_name)
     {
-        $indexes = $this->getIndexNames();
-        $str_index = '';
+        if ($this->checkIndexName($index_name)['is_index_name_valid']) {
+            $this->index_name = $index_name;
+        } else {
+            throw new InvalidArgumentException('Les index valide sont : ' . trim($this->checkIndexName($index_name)['list_index_valid'], ', '));
+        }
+    }
+
+    public function checkIndexName(string $index_name): array
+    {
         $index_valid = false;
+        $str_index = '';
+        $indexes = $this->getIndexNames();
+        //liste les noms de l'index
         foreach ($indexes as $index) {
-            //liste les noms de l'index
             $array_index = explode('_', $index);
             $str_index .= $array_index[count($array_index) - 1] . ', ';
 
@@ -69,15 +87,37 @@ class MeiliSearchService
             }
         }
 
-        if ($index_valid) {
-            $this->index_name = $index_name;
-        } else {
-            throw new InvalidArgumentException('Les index valide sont : ' . trim($str_index, ', '));
-        }
+        return [
+            'is_index_name_valid' => $index_valid,
+            'list_index_valid' => $str_index
+        ];
     }
 
-    public function getIndexName(): string
+    public function getOptions(): array
     {
-        return $this->index_name;
+        return $this->options;
+    }
+
+    public function setOptions(array $options): self
+    {
+        foreach ($options as $key => $option) {
+            $this->options[$key] = $option;
+        }
+
+        return $this;
+    }
+
+    protected function applySortable(): void
+    {
+        switch ($this->index_name) {
+            case 'user':
+                $this->setOptions(['sort' => ['id:desc']]);
+                break;
+            case 'offreEmploi':
+                $this->setOptions(['sort' => ['date_created_at:desc']]);
+                break;
+            default:
+                break;
+        }
     }
 }
