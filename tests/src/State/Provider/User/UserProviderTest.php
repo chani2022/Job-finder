@@ -52,7 +52,8 @@ class UserProviderTest extends KernelTestCase
         } else {
             $this->assertArrayHasKey("hits", $data);
             $this->assertGreaterThan(2, $data['nbHits']);
-            $this->assertGreaterThan($data['hits'][0]['id'], $data['hits'][1]['id']);
+            //trie par ordre decroissant par id
+            $this->assertTrue($data['hits'][0]['id'] > $data['hits'][1]['id']);
         }
     }
 

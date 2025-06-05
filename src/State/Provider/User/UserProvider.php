@@ -18,7 +18,8 @@ class UserProvider implements ProviderInterface
     {
         if ($operation instanceof CollectionOperationInterface) {
             $this->meiliSearchService->setIndexName('user');
-            return $this->meiliSearchService->search('user');
+            $this->meiliSearchService->setOptions(['sort' => ['id:desc']]);
+            return $this->meiliSearchService->search();
         }
         return $this->userRepository->find($uriVariables['id']);
     }
