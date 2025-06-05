@@ -24,7 +24,7 @@ class MeiliSearchService
         private readonly string $meili_prefix
     ) {
         $this->client = new Client($meili_url, $meili_key);
-        $this->index_name = null;
+        $this->index_name = '';
         $this->options = [
             'attributesToHighlight' => ['*'],
             'highlightPreTag' => '<em>',
@@ -43,7 +43,6 @@ class MeiliSearchService
             throw new Exception("Vous devez appeler la methode setIndexName avant de faire la recherche sur meili");
         }
 
-        $this->applySortable();
         $index = $this->client->index($this->meili_prefix . '' . $this->index_name);
         return $index->search($query, $this->options)->getRaw();
     }
@@ -105,19 +104,5 @@ class MeiliSearchService
         }
 
         return $this;
-    }
-
-    protected function applySortable(): void
-    {
-        switch ($this->index_name) {
-            case 'user':
-                $this->setOptions(['sort' => ['id:desc']]);
-                break;
-            case 'offreEmploi':
-                $this->setOptions(['sort' => ['date_created_at:desc']]);
-                break;
-            default:
-                break;
-        }
     }
 }

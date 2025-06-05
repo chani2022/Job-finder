@@ -3,7 +3,6 @@
 namespace App\Tests\src\MeilSearch;
 
 use App\MeiliSearch\MeiliSearchService;
-use Error;
 use Exception;
 use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
 use Meilisearch\Exceptions\InvalidArgumentException;
@@ -61,6 +60,19 @@ class MeilSearchServiceTest extends KernelTestCase
 
         $this->assertTrue(count($indexes) > 0);
     }
+
+    /**
+     * @dataProvider getIndexForSearch
+     */
+    public function testGetIndexName(?string $index_name): void
+    {
+        $this->meilSearchService->setIndexName($index_name);
+        if ($index_name) {
+            $this->assertEquals($index_name, $this->meilSearchService->getIndexName());
+        } else {
+            $this->expectException(InvalidArgumentException::class);
+        }
+    }
     /**
      * @dataProvider listIndexName
      */
@@ -73,6 +85,38 @@ class MeilSearchServiceTest extends KernelTestCase
         if ($is_valid) {
             $this->assertEquals($index_name, $this->meilSearchService->getIndexName());
         }
+    }
+    /**
+     * @dataProvider listIndexName
+     */
+    public function testCheckIndexName(bool $is_valid, string $index_name): void
+    {
+        if ($is_valid) {
+            $this->assertTrue($this->meilSearchService->checkIndexName($index_name)['is_index_name_valid']);
+        } else {
+            $this->assertFalse($this->meilSearchService->checkIndexName($index_name)['is_index_name_valid']);
+            $this->assertStringContainsString('offreEmploi', $this->meilSearchService->checkIndexName($index_name)['list_index_valid']);
+        }
+    }
+
+    public function testGetOptions(): void
+    {
+        $this->assertEquals([
+            'attributesToHighlight' => ['*'],
+            'highlightPreTag' => '<em>',
+            'highlightPostTag' => '</em>'
+        ], $this->meilSearchService->getOptions());
+    }
+
+    public function testSetOptions(): void
+    {
+        $this->meilSearchService->setOptions(['sort' => ['id:desc']]);
+        $this->assertEquals([
+            'attributesToHighlight' => ['*'],
+            'highlightPreTag' => '<em>',
+            'highlightPostTag' => '</em>',
+            'sort' => ['id:desc']
+        ], $this->meilSearchService->getOptions());
     }
 
     public static function listIndexName(): array
@@ -91,7 +135,6 @@ class MeilSearchServiceTest extends KernelTestCase
         return [
             'with_index_user' => ['index_name' => 'user'],
             'with_index_offreEmploi' => ['index_name' => 'offreEmploi'],
-            'without_index' => ['index_name' => null]
         ];
     }
 }
