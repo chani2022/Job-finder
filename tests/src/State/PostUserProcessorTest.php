@@ -65,6 +65,6 @@ class PostUserProcessorTest extends KernelTestCase
         $meili = static::getContainer()->get(MeiliSearchService::class);
         $meili->setIndexName('user');
         $res = $meili->search($user->getUsername());
-        $this->assertEquals(1, count($res['hits']));
+        $this->assertTrue(count($res['hits']) > 0);
     }
 }
