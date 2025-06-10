@@ -6,6 +6,7 @@ use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use ApiPlatform\Symfony\Bundle\Test\Client;
 use App\Traits\FixturesTrait;
 use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
+use ApiPlatform\Symfony\Bundle\Test\Response;
 
 class GetCollectionOffreEmploiControllerTest extends ApiTestCase
 {
@@ -24,7 +25,7 @@ class GetCollectionOffreEmploiControllerTest extends ApiTestCase
      */
     public function testGetCollectionOffre(?string $query): void
     {
-        $this->client->request('GET', '/api/offre_emplois?query' . $query);
+        $this->client->request('GET', '/api/offre_emplois?query=' . $query);
 
         $this->assertResponseIsSuccessful();
     }

@@ -7,6 +7,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use App\Repository\OffreEmploiRepository;
+use App\State\OffreEmploi\OffreEmploiProvider;
 use App\State\Processor\OffreEmploiProcessor;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -21,7 +22,9 @@ use Symfony\Component\Validator\Constraints\NotBlank;
     denormalizationContext: ['groups' => 'write:offre'],
     normalizationContext: ['groups' => 'read:get:offre', 'read:collection:offre'],
     operations: [
-        new GetCollection(),
+        new GetCollection(
+            provider: OffreEmploiProvider::class
+        ),
         new Get(),
         new Post(
             denormalizationContext: ['groups' => 'post:create:offre'],
