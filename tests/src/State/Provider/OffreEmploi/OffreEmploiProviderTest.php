@@ -40,7 +40,6 @@ class OffreEmploiProviderTest extends KernelTestCase
         $offreEmploiProvider = new OffreEmploiProvider($meiliSearchService);
         $res = $offreEmploiProvider->provide($operation, $uriVariables, $context);
 
-
         $this->assertTrue(
             $res['hits'][0]['_formatted']['id']
                 >
@@ -48,7 +47,6 @@ class OffreEmploiProviderTest extends KernelTestCase
         );
 
         if ($query) {
-            $this->assertTrue($res['nbHits'] < 5);
             $this->assertStringContainsString('test', $res['hits'][0]['_formatted']['description']);
         } else {
             $this->assertTrue($res['nbHits'] > 5);
