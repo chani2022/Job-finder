@@ -19,12 +19,22 @@ class GetCollectionOffreEmploiControllerTest extends ApiTestCase
         parent::setUp();
         $this->client = $this->createClient();
     }
-
-    public function testGetCollectionOffre(): void
+    /**
+     * @dataProvider getQuery
+     */
+    public function testGetCollectionOffre(?string $query): void
     {
-        $this->client->request('GET', '/api/offre_emplois');
+        $this->client->request('GET', '/api/offre_emplois?query' . $query);
 
         $this->assertResponseIsSuccessful();
+    }
+
+    public static function getQuery(): array
+    {
+        return [
+            'with_query' => ['titre de test'],
+            'without_query' => [null]
+        ];
     }
 
     protected function tearDown(): void
