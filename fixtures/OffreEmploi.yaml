@@ -4,7 +4,17 @@ App\Entity\OffreEmploi:
     description: <sentences(5,25)>
     secteurActivite: '@secteur_unique'
     user: '@admin_adm_society'
-  offre_emploi_random_{1..20}:
+  offre_emploi_search:
+    titre: 'titre de test <sentences(2,10)>'
+    description: 'description de test <sentences(5,25)>'
+    # secteurActivite: '@secteur_unique'
+    user: '@admin_adm_society'
+  offre_emploi_search_1:
+    titre: 'titre de test2 <sentences(2,10)>'
+    description: 'description de test2 <sentences(5,30)>'
+    # secteurActivite: '@secteur_unique'
+    user: '@admin_adm_society'
+  offre_emploi_not_secteur_{1..5}:
     titre: <sentences(2,10)>
     description: <sentences(5,25)>
     # secteurActivite: '@secteur_unique'

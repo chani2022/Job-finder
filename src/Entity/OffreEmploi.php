@@ -74,7 +74,9 @@ class OffreEmploi
     #[
         ORM\Column,
         Groups([
-            'read:get:notification'
+            'read:get:notification',
+            'read:get:offre',
+            'read:collection:offre',
         ])
     ]
     private ?\DateTimeImmutable $date_created_at = null;

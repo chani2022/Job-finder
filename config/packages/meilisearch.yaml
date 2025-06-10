@@ -47,7 +47,7 @@ meilisearch:
           serializer_groups: ['read:get:offre', 'read:collection:offre']
           settings:
             searchableAttributes: ['*']  # Champs recherchables
-            sortableAttributes: ['date_created_at']           # Tri possible
+            sortableAttributes: ['date_created_at', 'id']           # Tri possible
             typoTolerance:
                 enabled: true
                 minWordSizeForTypos:
