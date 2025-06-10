@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\MediaObjectRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\Get;
@@ -73,8 +75,49 @@ class MediaObject
     #[ORM\Column(nullable: true)]
     public ?string $filePath = null;
 
+    /**
+     * @var Collection<int, PieceJointe>
+     */
+    #[ORM\OneToMany(targetEntity: PieceJointe::class, mappedBy: 'cv')]
+    private Collection $pieceJointes;
+
+    public function __construct()
+    {
+        $this->pieceJointes = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    /**
+     * @return Collection<int, PieceJointe>
+     */
+    public function getPieceJointes(): Collection
+    {
+        return $this->pieceJointes;
+    }
+
+    public function addPieceJointe(PieceJointe $pieceJointe): static
+    {
+        if (!$this->pieceJointes->contains($pieceJointe)) {
+            $this->pieceJointes->add($pieceJointe);
+            $pieceJointe->setCv($this);
+        }
+
+        return $this;
+    }
+
+    public function removePieceJointe(PieceJointe $pieceJointe): static
+    {
+        if ($this->pieceJointes->removeElement($pieceJointe)) {
+            // set the owning side to null (unless already changed)
+            if ($pieceJointe->getCv() === $this) {
+                $pieceJointe->setCv(null);
+            }
+        }
+
+        return $this;
     }
 }

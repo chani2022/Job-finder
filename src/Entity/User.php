@@ -309,12 +309,26 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'user')]
     private Collection $notifications;
 
+    /**
+     * @var Collection<int, Candidature>
+     */
+    #[ORM\OneToMany(targetEntity: Candidature::class, mappedBy: 'candidat')]
+    private Collection $candidatures;
+
+    /**
+     * @var Collection<int, PieceJointe>
+     */
+    #[ORM\OneToMany(targetEntity: PieceJointe::class, mappedBy: 'owner')]
+    private Collection $pieceJointes;
+
     public function __construct()
     {
         $this->status = false;
         $this->abonnements = new ArrayCollection();
         $this->offreEmplois = new ArrayCollection();
         $this->notifications = new ArrayCollection();
+        $this->candidatures = new ArrayCollection();
+        $this->pieceJointes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -596,6 +610,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
             // set the owning side to null (unless already changed)
             if ($notification->getUser() === $this) {
                 $notification->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Candidature>
+     */
+    public function getCandidatures(): Collection
+    {
+        return $this->candidatures;
+    }
+
+    public function addCandidature(Candidature $candidature): static
+    {
+        if (!$this->candidatures->contains($candidature)) {
+            $this->candidatures->add($candidature);
+            $candidature->setCandidat($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCandidature(Candidature $candidature): static
+    {
+        if ($this->candidatures->removeElement($candidature)) {
+            // set the owning side to null (unless already changed)
+            if ($candidature->getCandidat() === $this) {
+                $candidature->setCandidat(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PieceJointe>
+     */
+    public function getPieceJointes(): Collection
+    {
+        return $this->pieceJointes;
+    }
+
+    public function addPieceJointe(PieceJointe $pieceJointe): static
+    {
+        if (!$this->pieceJointes->contains($pieceJointe)) {
+            $this->pieceJointes->add($pieceJointe);
+            $pieceJointe->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removePieceJointe(PieceJointe $pieceJointe): static
+    {
+        if ($this->pieceJointes->removeElement($pieceJointe)) {
+            // set the owning side to null (unless already changed)
+            if ($pieceJointe->getOwner() === $this) {
+                $pieceJointe->setOwner(null);
             }
         }
 
