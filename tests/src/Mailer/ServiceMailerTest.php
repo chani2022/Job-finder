@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\src\Mail;
+namespace App\Tests\src\Mailer;
 
 use App\Entity\User;
 use App\Mailer\ServiceMailer;
@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 
-class MailerTest extends KernelTestCase
+class ServiceMailerTest extends KernelTestCase
 {
     use MailerAssertionsTrait;
 
