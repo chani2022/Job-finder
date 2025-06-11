@@ -149,10 +149,17 @@ class OffreEmploi
     #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'offreEmploi')]
     private Collection $notifications;
 
+    /**
+     * @var Collection<int, Candidature>
+     */
+    #[ORM\OneToMany(targetEntity: Candidature::class, mappedBy: 'offreEmploi')]
+    private Collection $candidatures;
+
     public function __construct()
     {
         $this->date_created_at = new DateTimeImmutable();
         $this->notifications = new ArrayCollection();
+        $this->candidatures = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -292,6 +299,36 @@ class OffreEmploi
             // set the owning side to null (unless already changed)
             if ($notification->getOffreEmploi() === $this) {
                 $notification->setOffreEmploi(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Candidature>
+     */
+    public function getCandidatures(): Collection
+    {
+        return $this->candidatures;
+    }
+
+    public function addCandidature(Candidature $candidature): static
+    {
+        if (!$this->candidatures->contains($candidature)) {
+            $this->candidatures->add($candidature);
+            $candidature->setOffreEmploi($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCandidature(Candidature $candidature): static
+    {
+        if ($this->candidatures->removeElement($candidature)) {
+            // set the owning side to null (unless already changed)
+            if ($candidature->getOffreEmploi() === $this) {
+                $candidature->setOffreEmploi(null);
             }
         }
 
