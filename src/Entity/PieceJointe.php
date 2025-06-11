@@ -2,29 +2,58 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
 use App\Repository\PieceJointeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 #[ORM\Entity(repositoryClass: PieceJointeRepository::class)]
+#[ApiResource()]
 class PieceJointe
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[
+        ORM\Column,
+        Groups([
+            'read:get:candidature',
+            'read:collection:candidature',
+        ])
+    ]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[
+        ORM\Column(type: Types::TEXT),
+        Groups([
+            'read:get:candidature',
+            'read:collection:candidature',
+        ]),
+        NotBlank(groups: ['post:validator'])
+    ]
     private ?string $lettreMotivation = null;
 
     #[ORM\ManyToOne(inversedBy: 'pieceJointes')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[
+        ORM\JoinColumn(nullable: false),
+        NotBlank(groups: ['post:validator'])
+    ]
     private ?User $owner = null;
 
-    #[ORM\ManyToOne(inversedBy: 'pieceJointes')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(inversedBy: 'pieceJointes', cascade: ['persist'])]
+    #[
+        ORM\JoinColumn(nullable: false),
+        Groups([
+            'read:get:candidature',
+            'read:collection:candidature',
+        ]),
+        NotBlank(groups: [
+            'post:validator'
+        ])
+    ]
     private ?MediaObject $cv = null;
 
     /**

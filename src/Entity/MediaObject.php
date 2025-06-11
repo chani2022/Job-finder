@@ -63,7 +63,7 @@ class MediaObject
         'media_object:read',
         "read:user:get",
         "read:user:collection",
-        'read:collection:abonnement'
+        'read:collection:abonnement',
     ])]
     public ?string $contentUrl = null;
 
@@ -78,7 +78,9 @@ class MediaObject
     /**
      * @var Collection<int, PieceJointe>
      */
-    #[ORM\OneToMany(targetEntity: PieceJointe::class, mappedBy: 'cv')]
+    #[
+        ORM\OneToMany(targetEntity: PieceJointe::class, mappedBy: 'cv')
+    ]
     private Collection $pieceJointes;
 
     public function __construct()
