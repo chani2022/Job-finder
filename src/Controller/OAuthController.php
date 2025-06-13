@@ -97,13 +97,13 @@ final class OAuthController extends AbstractController
             switch ($client_oauth) {
                 case 'facebook':
                     $image_oauth = $data['picture_url'];
+
                     break;
                 case 'google':
                     $image_oauth = $data['picture'];
                 default:
                     break;
             }
-
             $this->uploadFile($user_fetch, $image_oauth);
 
             $this->em->persist($user_fetch);
@@ -123,8 +123,10 @@ final class OAuthController extends AbstractController
 
     private function uploadFile(User $user, $filename_oauth): User
     {
+
         $tempFilePath = sys_get_temp_dir() . '/' . uniqid() . '.jpg';
         file_put_contents($tempFilePath, file_get_contents($filename_oauth));
+
         $upload = new UploadedFile($tempFilePath, basename($tempFilePath), mime_content_type($tempFilePath), null, true);
         $media = new MediaObject();
         $media->file = $upload;

@@ -6,6 +6,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Entity\User;
 use App\Mailer\ServiceMailer;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -38,7 +39,16 @@ class PostUserProcessor implements ProcessorInterface
         $this->em->flush();
 
         //envoye d'email
-        $this->serviceMailer->send($data, "Confirmation");
+        $this->serviceMailer
+            ->subject('Confirmation de registration')
+            ->htmlTemplate('emails/confirmation_registration.html.twig')
+            ->to($data->getEmail())
+            ->context([
+                'user' => $data,
+                'expiration_date' => date('+7 days'),
+
+            ])
+            ->send();
 
         return $data;
     }

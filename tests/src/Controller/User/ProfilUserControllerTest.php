@@ -82,16 +82,13 @@ class ProfilUserControllerTest extends ApiTestCase
         $extra = [
             'parameters' => $data
         ];
-        if ($file['file']) {
 
-            $path_source_file = static::getContainer()->getParameter('path_source_image_test') . 'test.png';
-            $tmp = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'test_upload_file.png';
-            /**
-             * pour ne pas effacer le fichier dans le dossier fixtures
-             * lors de l'instance de uploadedfile
-             */
-            copy($path_source_file, $tmp);
-            $file_to_upload = new UploadedFile($tmp, 'test.png');
+        if ($file['file']) {
+            $filename = 'test.png';
+            $pathfile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $filename;
+            file_put_contents($pathfile, 'fake file');
+
+            $file_to_upload = new UploadedFile($pathfile, $filename, 'image/png', null, true);
             $extra['files']['file'] = $file_to_upload;
         }
 
@@ -102,9 +99,9 @@ class ProfilUserControllerTest extends ApiTestCase
             ],
             "extra" => $extra
         ]);
-
+        /** @var User  */
         $user = $this->em->getRepository(User::class)->find($user_1->getId());
-
+        $filename = $user->image->filePath;
         $this->assertJsonContains(["token" => $response->toArray()['token']]);
 
         foreach ($data as $attr => $value) {
@@ -120,18 +117,11 @@ class ProfilUserControllerTest extends ApiTestCase
         if ($file['file']) {
 
             $path_dest_file = static::getContainer()->getParameter('path_dest_images_test');
-            $paths = scandir($path_dest_file);
-            $file_name = null;
-            foreach ($paths as $r) {
-                if ($r != ".." and $r != ".") {
-                    if (str_starts_with($r, "test") and str_ends_with($r, ".png")) {
-                        $file_name = $path_dest_file . '' . $r;
-                    }
-                }
-            }
-            $this->assertFileExists($file_name);
-            unlink($file_name);
-            $this->assertFileDoesNotExist($file_name);
+            $pathfile = $path_dest_file . '' . $filename;
+
+            $this->assertFileExists($pathfile);
+            unlink($pathfile);
+            $this->assertFileDoesNotExist($pathfile);
         }
     }
 

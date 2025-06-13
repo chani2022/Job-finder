@@ -75,7 +75,7 @@ class OAuthcontrollerTest extends KernelTestCase
     /**
      * @dataProvider provideClient
      */
-    public function testConnectCheckAction(string $oauth, array $data): void
+    public function testConnectionCheckAction(string $oauth, array $data): void
     {
         $request = new Request();
         $request->query->set('client', $oauth);
@@ -88,9 +88,9 @@ class OAuthcontrollerTest extends KernelTestCase
             ->willReturn($client);
 
         if ($oauth == "google") {
-            $data['picture'] = $this->container->getParameter('path_source_image_test') . 'test.png';
+            $data['picture'] = $this->container->getParameter('path_source_image_test') . DIRECTORY_SEPARATOR . 'test.png';
         } else {
-            $data['picture_url'] = $this->container->getParameter('path_source_image_test') . 'test.png';
+            $data['picture_url'] = $this->container->getParameter('path_source_image_test') . DIRECTORY_SEPARATOR . 'test.png';
         }
 
         $resourceOwner = $this->createMock(ResourceOwnerInterface::class);

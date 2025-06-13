@@ -50,14 +50,16 @@ class CandidatureProcessorTest extends KernelTestCase
         $request->request->set('lettre', 'une lettre de motivation');
         $request->request->set('id_offre', $offreEmploi->getId());
         //file
-        $path_source_file = static::getContainer()->getParameter('path_source_image_test') . 'test.png';
-        $tmp = sys_get_temp_dir() . '/test_upload_file.png';
+        $filename = 'upload.pdf';
+        $filepath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $filename;
+        file_put_contents($filepath, '%PDF-1.4 fake PDF content');
+
         /**
          * pour ne pas effacer le fichier dans le dossier fixtures
          * lors de l'instance de uploadedfile
          */
-        copy($path_source_file, $tmp);
-        $uploadedFile = new UploadedFile($tmp, 'test.png', null, null, true);
+        // copy($path_source_file, $tmp);
+        $uploadedFile = new UploadedFile($filepath, $filename, 'application/pdf', null, true);
         $request->files->set('file', $uploadedFile);
         $context['request'] = $request;
 
@@ -70,24 +72,17 @@ class CandidatureProcessorTest extends KernelTestCase
         $res = $candidatureProcessor->process(null, new Post(), [], $context);
         /** @var Candidature */
         $candidature_bdd = $em->getRepository(Candidature::class)->find($res->getId());
+        $filename_bdd = $candidature_bdd->getPieceJointe()->getCv()->filePath;
 
         $this->assertNotNull($res->getId());
         $this->assertEquals($candidature_bdd->getCandidat()->getId(), $user->getId());
 
         // effacement des fichier uploader
         $path_dest = static::getContainer()->getParameter('path_dest_images_test');
-        $file_name = null;
-        foreach (scandir($path_dest) as $r) {
-            if ($r != ".." and $r != ".") {
-                if (str_starts_with($r, "test") and str_ends_with($r, ".png")) {
-                    $file_name = $path_dest . '' . $r;
-                }
-            }
-        }
-
-        $this->assertFileExists($file_name);
-        unlink($file_name);
-        $this->assertFileDoesNotExist($file_name);
+        $pathFilename_dest = $path_dest . DIRECTORY_SEPARATOR . $filename_bdd;
+        $this->assertFileExists($pathFilename_dest);
+        unlink($pathFilename_dest);
+        $this->assertFileDoesNotExist($pathFilename_dest);
     }
 
     protected function tearDown(): void

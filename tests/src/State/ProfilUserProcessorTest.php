@@ -64,39 +64,29 @@ class ProfilUserProcessorTest extends KernelTestCase
         }
 
         if ($file['file']) {
-            $path_file = static::getContainer()->getParameter('path_source_image_test') . 'test.png';
-            $tmp_file = sys_get_temp_dir() . '/test_uploaded_file.png';
-            copy($path_file, $tmp_file);
-            $uploadedFile = new UploadedFile($tmp_file, 'test.png', null, null, true);
+            $filename = 'test.png';
+            $tmp = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $filename;
+            file_put_contents($tmp, 'test');
+            $uploadedFile = new UploadedFile($tmp, $filename, 'image/png', null, true);
             $request->files->set('file', $uploadedFile);
         }
 
         $post = new Post();
         /** @var JsonResponse $user_process */
         $json_response = $this->profilUserProcessor->process(null, $post, [], ['request' => $request]);
-
+        /** @var User */
+        $user_bdd = $this->em->getRepository(User::class)->find($user_1->getId());
         /**
          * verifie si le fichier est bien uploader
          * puis on l'efface
          */
         if ($file['file']) {
             $path_dest = static::getContainer()->getParameter('path_dest_images_test');
-            $file_name = null;
-            foreach (scandir($path_dest) as $r) {
-                if ($r != ".." and $r != ".") {
-                    if (str_starts_with($r, "test") and str_ends_with($r, ".png")) {
-                        $file_name = $path_dest . '' . $r;
-                    }
-                }
-            }
-
-            $this->assertFileExists($file_name);
-            unlink($file_name);
-            $this->assertFileDoesNotExist($file_name);
+            $pathFilename = $path_dest . '' . $user_bdd->image->filePath;
+            $this->assertFileExists($pathFilename);
+            unlink($pathFilename);
+            $this->assertFileDoesNotExist($pathFilename);
         }
-
-        $user_bdd = $this->em->getRepository(User::class)->find($user_1->getId());
-
 
         $this->assertEquals("username", $user_1->getUsername());
         $this->assertEquals("email@email.com", $user_1->getEmail());

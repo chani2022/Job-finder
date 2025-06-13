@@ -4,7 +4,7 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-    path_source_image_test: '%kernel.project_dir%/fixtures/'
+    path_source_image_test: '%kernel.project_dir%/fixtures'
     path_dest_images_test: '%kernel.project_dir%/public/media/'
     domaine_name_server: '%env(DOMAINE_NAME_SERVER)%'
     sender_mail: '%env(GMAIL_SENDER)%'
@@ -21,6 +21,9 @@ parameters:
     meilisearch_api_key: '%env(MEILISEARCH_API_KEY)%'
     meilisearch_prefix: '%env(MEILISEARCH_PREFIX)%'
 
+    #template path
+    template_path: '%kernel.project_dir%/templates/'
+    
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -55,9 +58,18 @@ services:
         alias: mailer.mailer
         public: true
 
-    App\Mailer\ServiceMailer:
-        arguments: 
-            $domaine_name_server: '%domaine_name_server%'
+    # App\Mailer\ServiceMailer:
+    #     arguments:
+    #         $dir_file_email_attachement: '%path_dest_images_test%'
+    #         $template_path: '%template_path%'
+
+    App\Service\FilesystemLocatorTemplate:
+        arguments:
+            $template_path: '%template_path%'
+
+    App\Service\FileEmailAttachementLocator:
+        arguments:
+            $path_source_image_test: '%path_dest_images_test%'
 
 
     App\Controller\Payum\PaymentController:
@@ -73,6 +85,8 @@ services:
             $meili_url: '%meilisearch_url%'
             $meili_key: '%meilisearch_api_key%'
             $meili_prefix: '%meilisearch_prefix%'
+
+    
 
 
     

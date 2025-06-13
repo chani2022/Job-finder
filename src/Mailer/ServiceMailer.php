@@ -2,46 +2,114 @@
 
 namespace App\Mailer;
 
-use App\Entity\User;
+use App\Service\FileEmailAttachementLocator;
+use App\Service\FilesystemLocatorTemplate;
+use BadMethodCallException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Address;
 
 class ServiceMailer
 {
     private MailerInterface $mailer;
-    private RequestStack $requestStack;
-    private string $domaine_name_server;
+    private TemplatedEmail $templatedEmail;
 
-    public function __construct(MailerInterface $mailer, RequestStack $requestStack, string $domaine_name_server)
-    {
+    public function __construct(
+        MailerInterface $mailer,
+        private readonly FileEmailAttachementLocator $fileAttachement,
+        private readonly FilesystemLocatorTemplate $templateLocator,
+        ?TemplatedEmail $templatedEmail = null
+    ) {
         $this->mailer = $mailer;
-        $this->requestStack = $requestStack;
-        $this->domaine_name_server = $domaine_name_server;
+        $this->templatedEmail = $templatedEmail ?? new TemplatedEmail();
     }
 
-    public function send(User $to, string $subject): void
+    public function to(string $to): self
     {
-        $local = $this->requestStack->getCurrentRequest() ? $this->requestStack->getCurrentRequest()->getLocale() : 'fr';
+        $this->templatedEmail->to($to);
 
-        $email = (new TemplatedEmail())
-            ->to(new Address($to->getEmail()))
-            ->subject($subject)
+        return $this;
+    }
 
-            // path of the Twig template to render
-            ->htmlTemplate('emails/confirmation_registration.html.twig')
+    public function getTo(): array
+    {
+        return $this->templatedEmail->getTo();
+    }
 
-            // change locale used in the template, e.g. to match user's locale
-            ->locale($local)
+    public function from(string $from): self
+    {
+        $this->templatedEmail->from($from);
 
-            // pass variables (name => value) to the template
-            ->context([
-                'expiration_date' => new \DateTime('+7 days'),
-                'user' => $to,
-                'domaine_name' => $this->domaine_name_server
-            ]);
+        return $this;
+    }
 
-        $this->mailer->send($email);
+    public function getFrom(): array
+    {
+        return $this->templatedEmail->getFrom();
+    }
+
+    public function subject(string $subject): self
+    {
+        $this->templatedEmail->subject($subject);
+
+        return $this;
+    }
+
+    public function getSubject(): ?string
+    {
+        return $this->templatedEmail->getSubject();
+    }
+
+    public function htmlTemplate(string $template): self
+    {
+        // if (!file_exists($this->template_path . '' . $template)) {
+        //     throw new FileNotFoundException('Le fichier ' . $template . ' est introuvable');
+        // }
+
+        $this->templatedEmail->htmlTemplate($template);
+
+        return $this;
+    }
+
+    public function getHtmlTemplate(): ?string
+    {
+        return $this->templatedEmail->getHtmlTemplate();
+    }
+
+    public function attachFile(string $filename, ?string $name): static
+    {
+        if (!$this->fileAttachement->exists($filename)) {
+            throw new FileNotFoundException('le fichier ' . $this->fileAttachement->getPathFile() . DIRECTORY_SEPARATOR . $filename . ' introuvable');
+        }
+
+        $this->templatedEmail->attachFromPath($this->fileAttachement->getPathFile() . DIRECTORY_SEPARATOR . $filename, $name);
+
+        return $this;
+    }
+
+    public function getAttachFile(): array
+    {
+        return $this->templatedEmail->getAttachments();
+    }
+
+    public function context(array $context): static
+    {
+        if (is_null($this->getHtmlTemplate())) {
+            throw new BadMethodCallException('Vous devez appeler la methode htmlTemplate avant');
+        }
+
+        $this->templatedEmail->context($context);
+
+        return $this;
+    }
+
+    public function getContext(): array
+    {
+        return  $this->templatedEmail->getContext();
+    }
+
+    public function send(): void
+    {
+        $this->mailer->send($this->templatedEmail);
     }
 }
