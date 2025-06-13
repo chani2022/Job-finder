@@ -10,14 +10,34 @@ class WriterPdf
 
     public function __construct(private readonly string $dir_output_pdf, ?TCPDF $pdf = null)
     {
-        $this->pdf = $pdf ?? new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+        $this->pdf = $pdf ?? new TCPDF();
     }
 
-    // public function setTitle(string $title): static {}
+    public function addPage(): static
+    {
+        $this->pdf->AddPage();
+
+        return $this;
+    }
+
+
+    public function setTitle(string $title): static
+    {
+        $this->pdf->setTitle($title);
+
+        return $this;
+    }
 
     public function setSubject(string $subject): static
     {
         $this->pdf->setSubject($subject);
+
+        return $this;
+    }
+
+    public function setContent(string $content): static
+    {
+        $this->pdf->Write(h: 10, txt: $content, margin: [10, 10, 10]);
 
         return $this;
     }
