@@ -23,6 +23,9 @@ parameters:
 
     #template path
     template_path: '%kernel.project_dir%/templates/'
+
+    #dir output pdf
+    dir_output_pdf: '%kernel.project_dir%/pdf'
     
 services:
     # default configuration for services in *this* file
@@ -58,10 +61,9 @@ services:
         alias: mailer.mailer
         public: true
 
-    # App\Mailer\ServiceMailer:
-    #     arguments:
-    #         $dir_file_email_attachement: '%path_dest_images_test%'
-    #         $template_path: '%template_path%'
+    App\Pdf\WriterPdf:
+        arguments:
+            $dir_output_pdf: '%dir_output_pdf%'
 
     App\Service\FilesystemLocatorTemplate:
         arguments:
