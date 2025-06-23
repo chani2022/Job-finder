@@ -10,14 +10,15 @@ use App\Entity\MediaObject;
 use App\Entity\OffreEmploi;
 use App\Entity\PieceJointe;
 use App\Entity\User;
+use App\Mailer\ServiceMailer;
 use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException;
+use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserProvider;
 use LogicException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class CandidatureProcessor implements ProcessorInterface
@@ -26,35 +27,56 @@ class CandidatureProcessor implements ProcessorInterface
         private readonly EntityManagerInterface $em,
         private ValidatorInterface $validator,
         private readonly TokenStorageInterface $tokenStorage,
-        private UserProviderInterface $userProvider
+        private JWTUserProvider $userProvider,
+        private readonly ServiceMailer $serviceMailer
     ) {}
-
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Candidature|ValidatorException
-    {
+    /**
+     * @throws ValidatorException
+     * @throws LogicException
+     * @throws NotFoundException
+     * @throws InvalidArgumentException
+     */
+    public function process(
+        mixed $data,
+        Operation $operation,
+        array $uriVariables = [],
+        array $context = []
+    ) {
         $user = $this->getAuthenticatedUser();
-        $candidature = new Candidature();
 
-        if ($this->checkKeyRequestFromContext($context)) {
-            if ($this->checkKeysRequest($context['request'])) {
-                $data = $this->getDataRequest($context['request']);
+        $this->checkKeyRequestFromContext($context);
+        $this->checkKeysRequest($context['request']);
+        $data = $this->getDataRequest($context['request']);
 
-                $lettre = $data['lettre'];
-                $id_offreEmploi = $data['id_offre'];
-                $file = $data['file'];
+        $lettre = $data['lettre'];
+        $id_offreEmploi = $data['id_offre'];
+        $file = $data['file'];
 
-                $candidature = $this->setCandidature($user, $id_offreEmploi, $lettre, $file);
-                $this->validate($candidature);
-
-                $this->save($candidature);
-            }
+        if (!$file instanceof UploadedFile) {
+            return;
         }
+
+        $candidature = $this->setCandidature($user, $id_offreEmploi, $lettre, $file);
+
+        $this->validate($candidature);
+
+        $this->save($candidature);
+
+        //envoye d'email
+        $filename = $candidature->getPieceJointe()->getCv()->filePath;
+        $name = $user->getNom() ? $user->getNom() . ' ' . $user->getPrenom() : $user->getEmail();
+        $this->serviceMailer
+            ->to($candidature->getOffreEmploi()->getUser()->getEmail())
+            ->from($user->getEmail())
+            ->htmlTemplate('emails/candidature.html.twig')
+            ->attachFile($filename, $name);
 
         return $candidature;
     }
     /** 
-     * @return User|NotFoundHttpException
+     * @throws LogicException si utilisateur n'est présent ou ne pas une instance of de user
      */
-    public function getAuthenticatedUser()
+    public function getAuthenticatedUser(): User
     {
         $token = $this->tokenStorage->getToken();
 
@@ -66,7 +88,7 @@ class CandidatureProcessor implements ProcessorInterface
     }
 
     /**
-     * @throws InvalidArgumentException
+     * @throws InvalidArgumentException si la clé request n'est pas présent dans le context
      */
     public function checkKeyRequestFromContext(array $context): bool
     {
@@ -77,7 +99,7 @@ class CandidatureProcessor implements ProcessorInterface
     }
 
     /**
-     * @throws InvalidArgumentException
+     * @throws InvalidArgumentException si ces clés ne sont pas present dans le request id_offre, lettre, file
      */
     public function checkKeysRequest(Request $request): bool
     {
@@ -95,21 +117,21 @@ class CandidatureProcessor implements ProcessorInterface
     }
 
     /**
-     * @throws ValidatorException
+     * @throws ValidatorException si la constraintValidatorList contient une erreur
      */
-    public function validate(Candidature $candidature): bool
+    public function validate(Candidature $candidature)
     {
         $errors = $this->validator->validate($candidature, null, ['groups' => 'post:validator']);
         if ($errors->count() > 0) {
             throw new ValidatorException($errors);
         }
-        return true;
     }
 
     /**
-     * @throws InvalidArgumentException
+     * @throws InvalidArgumentException si les paramètres sont manquants ou n'est pas renseignés
+     * @return array<string, string|File>
      */
-    public function getDataRequest(Request $request): array
+    public function getDataRequest(Request $request)
     {
         $id_offre = $request->request->get('id_offre');
         $lettre = $request->request->get('lettre');
@@ -125,26 +147,38 @@ class CandidatureProcessor implements ProcessorInterface
         ];
     }
 
+    /**
+     * @throws NotFoundHttpException si l'objet offre emploi est introuvable
+     */
     public function setCandidature(User $user, string $id_offreEmploi, string $lettre, UploadedFile $file): Candidature
     {
+        $offreEmploi = $this->em
+            ->getRepository(OffreEmploi::class)
+            ->find($id_offreEmploi);
+
+        if (!$offreEmploi) {
+            throw new NotFoundHttpException(sprintf('L\'offre emploi %d est introuvable!', $id_offreEmploi));
+        }
+
+        $filename = $file->getClientOriginalName();
         $media = new MediaObject();
         $media->file = $file;
+        $media->filePath = $filename;
+
 
         $pieceJointe = (new PieceJointe())
             ->setLettreMotivation($lettre)
             ->setOwner($user)
             ->setCv($media);
 
-        $offreEmploi = $this->em
-            ->getRepository(OffreEmploi::class)
-            ->find($id_offreEmploi);
-
         return (new Candidature())
             ->setCandidat($user)
             ->setOffreEmploi($offreEmploi)
             ->setPieceJointe($pieceJointe);
     }
-
+    /**
+     * permet de sauvegarde dans la bdd
+     */
     public function save(Candidature $candidature): void
     {
         $this->em->persist($candidature);

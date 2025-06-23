@@ -4,17 +4,26 @@ namespace App\Tests\src\State\Processor\Candidature;
 
 use ApiPlatform\Metadata\Post;
 use App\Entity\Candidature;
+use App\Entity\MediaObject;
 use App\State\Processor\Candidature\CandidatureProcessor;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use App\Entity\User;
 use App\Entity\OffreEmploi;
+use App\Entity\PieceJointe;
+use App\Mailer\ServiceMailer;
 use App\Repository\OffreEmploiRepository;
+use App\Service\FileEmailAttachementLocator;
 use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException;
+use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserProvider;
 use LogicException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Mime\Part\DataPart;
+use Symfony\Component\Mime\Part\File;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
@@ -35,6 +44,8 @@ class CandidatureProcessorTest extends TestCase
     private ?CandidatureProcessor $candidatureProcessor = null;
     /** @var UserProviderInterface|null|MockObject */
     private $userProvider = null;
+    /** @var MockObject|ServiceMailer|null */
+    private $serviceMailer = null;
 
     protected function setUp(): void
     {
@@ -42,40 +53,87 @@ class CandidatureProcessorTest extends TestCase
         $this->em = $this->createMock(EntityManagerInterface::class);
         $this->validator = $this->createMock(ValidatorInterface::class);
         $this->tokenStorage = new TokenStorage();
-        $this->userProvider = $this->createMock(UserProviderInterface::class);
+        $this->userProvider = new JWTUserProvider(User::class);
+        $this->serviceMailer = $this->createMock(ServiceMailer::class);
 
-        $this->candidatureProcessor = new CandidatureProcessor($this->em, $this->validator, $this->tokenStorage, $this->userProvider);
+        $this->candidatureProcessor = new CandidatureProcessor(
+            $this->em,
+            $this->validator,
+            $this->tokenStorage,
+            $this->userProvider,
+            $this->serviceMailer
+        );
     }
 
-    public function testCandidatureProcessorSuccess(): void
+    public function testProcessCreatesCandidatureWithValidDataAndSendsEmail(): void
     {
         $operation = new Post();
         $data = [];
         $context = [];
 
-        $user = new User();
+        $user = (new User())
+            ->setEmail('test@test.com');
+
         $token = new UsernamePasswordToken($user, 'jwt');
         $this->tokenStorage->setToken($token);
-        $this->userProvider->expects($this->once())
-            ->method('refreshUser')
-            ->with($user)
-            ->willReturn($user);
 
         $dataRequest = [
             'id_offre' => 1,
             'lettre' => 1
         ];
-        $dataFile = [
-            'file' => $this->createMock(UploadedFile::class)
-        ];
+        $dataFile = $this->createFileAttachmentsForEmail($user);
 
-        $context['request'] = new Request([], $dataRequest, [], [], $dataFile);
+        $context['request'] = new Request([], $dataRequest, [], [], $dataFile['uploadedFile']);
 
-        $lettre = $context['request']->request->get('id_offre');
+        $lettre = $context['request']->request->get('lettre');
         $id_offreEmploi = $context['request']->request->get('id_offre');
-        $file = $context['request']->files->get('file');
 
-        $offreEmploi = new OffreEmploi();
+        $offreEmploi = $this->validateCandidature($id_offreEmploi);
+
+        $this->saveCandidature();
+
+        $this->assertIfEmailCalled($offreEmploi, $user, $dataFile);
+
+        $candidatureActual = $this->candidatureProcessor->process($data, $operation, [], $context);
+
+        $this->assertInstanceOf(Candidature::class, $candidatureActual);
+        $this->assertEquals($offreEmploi, $candidatureActual->getOffreEmploi());
+        $this->assertEquals($lettre, $candidatureActual->getPieceJointe()->getLettreMotivation());
+        $this->assertEquals($dataFile['uploadedFile']['file'], $candidatureActual->getPieceJointe()->getCv()->file);
+        $this->assertEquals($user, $candidatureActual->getCandidat());
+        $this->assertEquals($user, $candidatureActual->getPieceJointe()->getOwner());
+
+        //mail assert
+        // $this->assertEquals([$offreEmploi->getUser()->getEmail()], $this->serviceMailer->getTo());
+        // $this->assertEquals([$user->getEmail()], $this->serviceMailer->getFrom());
+        // $this->assertEquals('emails/candidature.html.twig', $this->serviceMailer->getHtmlTemplate());
+        // $this->assertEquals($excepted, $this->serviceMailer->getAttachFile());
+
+        // unlink($dataFile['pathfile']);
+    }
+
+    private function createFileAttachmentsForEmail(User $user): array
+    {
+        $filename = 'test.pdf';
+        $name = $user->getEmail();
+        $pathfile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $filename;
+        file_put_contents($pathfile, 'fake file');
+        $file = new UploadedFile($pathfile, $filename, 'application/pdf', null, true);
+        return [
+            'uploadedFile' => ['file' => $file],
+            'filename' => $filename,
+            'name' => $name,
+            'pathfile' => $pathfile
+        ];
+    }
+
+    private function validateCandidature(int $id_offreEmploi): OffreEmploi
+    {
+        $offreEmploi = (new OffreEmploi())
+            ->setUser(
+                (new User())
+                    ->setEmail('offre@offre.com')
+            );
         $offreEmploiRepository = $this->createMock(OffreEmploiRepository::class);
         $this->em
             ->method('getRepository')
@@ -86,93 +144,86 @@ class CandidatureProcessorTest extends TestCase
             ->with($id_offreEmploi)
             ->willReturn($offreEmploi);
 
-        $candidature = $this->candidatureProcessor->setCandidature($user, $id_offreEmploi, $lettre, $file);
-
-        $constraintViolationList = $this->createMock(ConstraintViolationListInterface::class);
+        $constraintViolationList = $this->createMock(ConstraintViolationList::class);
+        $constraintViolationList->method('count')->willReturn(0);
         $this->validator->expects($this->once())
             ->method('validate')
-            ->with($candidature)
+            ->with(
+                $this->callback(fn($value) => $value instanceof Candidature),
+                null,
+                ['groups' => 'post:validator']
+            )
             ->willReturn($constraintViolationList);
 
+        return $offreEmploi;
+    }
+
+    private function saveCandidature(): void
+    {
         $this->em->expects($this->once())
             ->method('persist')
-            ->with($candidature);
+            ->with($this->callback(fn($value) => $value instanceof Candidature));
 
         $this->em->expects($this->once())
             ->method('flush');
-
-        $res = $this->candidatureProcessor->process($data, $operation, [], $context);
-
-        $this->assertInstanceOf(Candidature::class, $res);
-        $this->assertEquals($offreEmploi, $res->getOffreEmploi());
-        $this->assertEquals($lettre, $res->getPieceJointe()->getLettreMotivation());
-        $this->assertEquals($file, $res->getPieceJointe()->getCv()->file);
-        $this->assertEquals($user, $res->getCandidat());
-        $this->assertEquals($user, $res->getPieceJointe()->getOwner());
     }
 
-    public function testCandidatureProcessorThrowException(): void
+    private function assertIfEmailCalled(OffreEmploi $offreEmploi, User $user, array $dataFile): void
     {
-        $operation = new Post();
-        $data = [];
-        $context = [];
+        // to
+        $this->serviceMailer->expects($this->once())
+            ->method('to')
+            ->with($offreEmploi->getUser()->getEmail())
+            ->willReturnSelf();
 
-        $user = new User();
-        $token = new UsernamePasswordToken($user, 'jwt');
-        $this->tokenStorage->setToken($token);
-        $this->userProvider->expects($this->once())
-            ->method('refreshUser')
-            ->with($user)
-            ->willReturn($user);
+        $this->serviceMailer->expects($this->once())
+            ->method('getTo')
+            ->willReturn([$offreEmploi->getUser()->getEmail()]);
 
-        $dataRequest = [
-            'id_offre' => 1,
-            'lettre' => 1
-        ];
-        $dataFile = [
-            'file' => $this->createMock(UploadedFile::class)
-        ];
+        //from
+        $this->serviceMailer->expects($this->once())
+            ->method('from')
+            ->with($user->getEmail())
+            ->willReturnSelf();
 
-        $context['request'] = new Request([], $dataRequest, [], [], $dataFile);
+        $this->serviceMailer->expects($this->once())
+            ->method('getFrom')
+            ->willReturn([$user->getEmail()]);
 
-        $lettre = $context['request']->request->get('id_offre');
-        $id_offreEmploi = $context['request']->request->get('id_offre');
-        $file = $context['request']->files->get('file');
+        //htmlTemplate
+        $this->serviceMailer->expects($this->once())
+            ->method('htmlTemplate')
+            ->with('emails/candidature.html.twig')
+            ->willReturnSelf();
 
-        $offreEmploi = new OffreEmploi();
-        $offreEmploiRepository = $this->createMock(OffreEmploiRepository::class);
-        $this->em
-            ->method('getRepository')
-            ->with(OffreEmploi::class)
-            ->willReturn($offreEmploiRepository);
-        $offreEmploiRepository
-            ->method('find')
-            ->with($id_offreEmploi)
-            ->willReturn($offreEmploi);
+        $this->serviceMailer->expects($this->once())
+            ->method('getHtmlTemplate')
+            ->willReturn('emails/candidature.html.twig');
+        //attachFile
+        $this->serviceMailer->expects($this->once())
+            ->method('attachFile')
+            ->with($dataFile['filename'], $dataFile['name'])
+            ->willReturnSelf();
 
-        $candidature = $this->candidatureProcessor->setCandidature($user, $id_offreEmploi, $lettre, $file);
+        $excepted = [$dataFile['filename']];
+        $this->serviceMailer->expects($this->once())
+            ->method('getAttachFile')
+            ->willReturn($excepted);
 
-        $constraintViolationList = $this->createMock(ConstraintViolationListInterface::class);
-        $constraintViolationList->method('count')->willReturn(1);
+        //mail assert
+        $this->assertEquals([$offreEmploi->getUser()->getEmail()], $this->serviceMailer->getTo());
+        $this->assertEquals([$user->getEmail()], $this->serviceMailer->getFrom());
+        $this->assertEquals('emails/candidature.html.twig', $this->serviceMailer->getHtmlTemplate());
+        $this->assertEquals($excepted, $this->serviceMailer->getAttachFile());
 
-        $this->validator->expects($this->once())
-            ->method('validate')
-            ->with($candidature, null, ['groups' => 'post:validator'])
-            ->willReturn($constraintViolationList);
-        $this->expectException(ValidatorException::class);
-        $this->candidatureProcessor->process($data, $operation, [], $context);
+        unlink($dataFile['pathfile']);
     }
-
 
     public function testGetAuthenticatedUserSuccess(): void
     {
         $user = (new User());
         $token = new UsernamePasswordToken($user, 'jwt');
         $this->tokenStorage->setToken($token);
-        $this->userProvider->expects($this->once())
-            ->method('refreshUser')
-            ->with($user)
-            ->willReturn($user);
 
         $res = $this->candidatureProcessor->getAuthenticatedUser();
 
@@ -247,15 +298,15 @@ class CandidatureProcessorTest extends TestCase
     public function testValidatorCandidatureNotException(): void
     {
         $candidature = new Candidature();
-        $violations = new ConstraintViolationList();
-
+        $violationsList = $this->createMock(ConstraintViolationList::class);
+        $violationsList->expects($this->once())
+            ->method('count')
+            ->willReturn(0);
         $this->validator->expects($this->once())
             ->method('validate')
-            ->willReturn($violations);
+            ->willReturn($violationsList);
 
-        $res = $this->candidatureProcessor->validate($candidature);
-
-        $this->assertTrue($res);
+        $this->candidatureProcessor->validate($candidature);
     }
 
     public function testGetDataRequestSuccess(): void
@@ -315,19 +366,20 @@ class CandidatureProcessorTest extends TestCase
     public function testValidatorCandidatureThrowException(): void
     {
         $candidature = new Candidature();
-        $violation = $this->createMock(ConstraintViolation::class);
-        $violations = new ConstraintViolationList([$violation]);
-
+        $violationList = $this->createMock(ConstraintViolationList::class);
+        $violationList->expects($this->once())
+            ->method('count')
+            ->willReturn(1);
         $this->validator->expects($this->once())
             ->method('validate')
-            ->willReturn($violations);
+            ->willReturn($violationList);
 
         $this->expectException(ValidatorException::class);
 
         $this->candidatureProcessor->validate($candidature);
     }
 
-    public function testSetCandidature(): void
+    public function testSetCandidatureSuccess(): void
     {
         $user = new User();
         $id_offreEmploi = 1;
@@ -354,6 +406,29 @@ class CandidatureProcessorTest extends TestCase
         $this->assertEquals($lettre, $candidature->getPieceJointe()->getLettreMotivation());
         $this->assertEquals($user, $candidature->getPieceJointe()->getOwner());
         $this->assertEquals($file, $candidature->getPieceJointe()->getCv()->file);
+        $this->assertEquals($file->getClientOriginalName(), $candidature->getPieceJointe()->getCv()->filePath);
+    }
+
+    public function testSetCandidatureThrowException(): void
+    {
+        $user = new User();
+        $id_offreEmploi = 1;
+        $lettre = 'lettre';
+        $file = $this->createMock(UploadedFile::class);
+
+        $offreEmploiRepository = $this->createMock(OffreEmploiRepository::class);
+        $this->em->expects($this->once())
+            ->method('getRepository')
+            ->with(OffreEmploi::class)
+            ->willReturn($offreEmploiRepository);
+
+        $offreEmploiRepository->expects($this->once())
+            ->method('find')
+            ->with(1)
+            ->willReturn(null);
+
+        $this->expectException(NotFoundHttpException::class);
+        $this->candidatureProcessor->setCandidature($user, $id_offreEmploi, $lettre, $file);
     }
 
     public function testSave(): void
@@ -369,8 +444,6 @@ class CandidatureProcessorTest extends TestCase
         $this->candidatureProcessor->save($candidature);
     }
 
-
-
     protected function tearDown(): void
     {
         parent::tearDown();
@@ -378,5 +451,6 @@ class CandidatureProcessorTest extends TestCase
         $this->validator = null;
         $this->tokenStorage = null;
         $this->candidatureProcessor = null;
+        $this->serviceMailer = null;
     }
 }

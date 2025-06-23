@@ -88,6 +88,9 @@ services:
             $meili_key: '%meilisearch_api_key%'
             $meili_prefix: '%meilisearch_prefix%'
 
+
+    Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserProvider: '@lexik_jwt_authentication.security.jwt_user_provider'
+
     
 
 
