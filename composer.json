@@ -25,6 +25,7 @@
         "payum/payum": "^1.7",
         "payum/payum-bundle": "^2.6",
         "payum/stripe": "*",
+        "php-amqplib/rabbitmq-bundle": "^2.17",
         "php-http/guzzle7-adapter": "^1.1",
         "php-http/message-factory": "*",
         "phpdocumentor/reflection-docblock": "^5.6",
