@@ -12,6 +12,7 @@ use App\Entity\User;
 use App\Entity\OffreEmploi;
 use App\Entity\PieceJointe;
 use App\Mailer\ServiceMailer;
+use App\RabbitMq\Producer\PdfProducer;
 use App\Repository\OffreEmploiRepository;
 use App\Service\FileEmailAttachementLocator;
 use Doctrine\ORM\EntityManagerInterface;
@@ -47,6 +48,8 @@ class CandidatureProcessorTest extends TestCase
     /** @var MockObject|ServiceMailer|null */
     private $serviceMailer = null;
 
+    private ?PdfProducer $pdfProducer = null;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -55,6 +58,7 @@ class CandidatureProcessorTest extends TestCase
         $this->tokenStorage = new TokenStorage();
         $this->userProvider = new JWTUserProvider(User::class);
         $this->serviceMailer = $this->createMock(ServiceMailer::class);
+
 
         $this->candidatureProcessor = new CandidatureProcessor(
             $this->em,
@@ -452,5 +456,6 @@ class CandidatureProcessorTest extends TestCase
         $this->tokenStorage = null;
         $this->candidatureProcessor = null;
         $this->serviceMailer = null;
+        $this->pdfProducer = null;
     }
 }

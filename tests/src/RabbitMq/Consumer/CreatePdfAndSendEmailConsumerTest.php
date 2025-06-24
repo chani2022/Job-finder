@@ -3,20 +3,21 @@
 namespace App\Tests\src\RabbitMq\Consumer;
 
 use App\Pdf\WriterPdf;
+use App\RabbitMq\Consumer\CreatePdfAndSendEmailConsumer;
 use App\RabbitMq\Consumer\PdfConsumer;
 use PhpAmqpLib\Message\AMQPMessage;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
-class PdfConsumerTest extends TestCase
+class CreatePdfAndSendEmailConsumerTest extends TestCase
 {
     private MockObject|WriterPdf|null $writerPdf;
-    private PdfConsumer|null $pdfConsumer;
+    private CreatePdfAndSendEmailConsumer|null $pdfEmailConsumer;
 
     protected function setUp(): void
     {
         $this->writerPdf = new WriterPdf(sys_get_temp_dir());
-        $this->pdfConsumer = new PdfConsumer($this->writerPdf);
+        $this->pdfEmailConsumer = new CreatePdfAndSendEmailConsumer($this->writerPdf);
     }
     /**
      * @dataProvider getData
@@ -24,7 +25,7 @@ class PdfConsumerTest extends TestCase
     public function testExecutePdfSuccess(array $data): void
     {
         $msg = new AMQPMessage(serialize($data));
-        $expected = $this->pdfConsumer->execute($msg);
+        $expected = $this->pdfEmailConsumer->execute($msg);
 
         $dir_output_pdf = $this->writerPdf->getDirOutputPdf();
         $name = $data['nom'] ?
@@ -63,7 +64,7 @@ class PdfConsumerTest extends TestCase
     public function testExecutePdfReturnFalse(array $data): void
     {
         $msg = new AMQPMessage(serialize($data));
-        $expected = $this->pdfConsumer->execute($msg);
+        $expected = $this->pdfEmailConsumer->execute($msg);
 
         $this->assertFalse($expected);
     }
@@ -88,6 +89,6 @@ class PdfConsumerTest extends TestCase
     protected function tearDown(): void
     {
         $this->writerPdf = null;
-        $this->pdfConsumer = null;
+        $this->pdfEmailConsumer = null;
     }
 }

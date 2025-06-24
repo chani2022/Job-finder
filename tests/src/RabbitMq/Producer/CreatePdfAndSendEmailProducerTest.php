@@ -2,23 +2,23 @@
 
 namespace App\Tests\src\RabbitMq\Producer;
 
-use App\RabbitMq\Producer\PdfProducer;
+use App\RabbitMq\Producer\CreatePdfAndSendEmailProducer;
 use OldSound\RabbitMqBundle\RabbitMq\ProducerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
-class PdfProducerTest extends TestCase
+class CreatePdfAndSendEmailProducerTest extends TestCase
 {
     private MockObject|ProducerInterface|null $generatePdfproducer;
-    private PdfProducer|null $pdfProducer;
+    private CreatePdfAndSendEmailProducer|null $pdfEmailProducer;
 
     protected function setUp(): void
     {
         $this->generatePdfproducer = $this->createMock(ProducerInterface::class);
-        $this->pdfProducer = new PdfProducer($this->generatePdfproducer);
+        $this->pdfEmailProducer = new CreatePdfAndSendEmailProducer($this->generatePdfproducer);
     }
 
-    public function testPublishPdf(): void
+    public function testPublishPdfAndEmail(): void
     {
         $data = [
             'nom' => 'nom',
@@ -31,12 +31,12 @@ class PdfProducerTest extends TestCase
             ->method('publish')
             ->with(serialize($data));
 
-        $this->pdfProducer->publishPdf($data);
+        $this->pdfEmailProducer->publishPdfAndEmail($data);
     }
 
     protected function tearDown(): void
     {
         $this->generatePdfproducer = null;
-        $this->pdfProducer = null;
+        $this->pdfEmailProducer = null;
     }
 }

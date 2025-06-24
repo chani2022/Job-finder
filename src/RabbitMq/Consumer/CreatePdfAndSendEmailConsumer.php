@@ -6,7 +6,7 @@ use App\Pdf\WriterPdf;
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
 use PhpAmqpLib\Message\AMQPMessage;
 
-class PdfConsumer implements ConsumerInterface
+class CreatePdfAndSendEmailConsumer implements ConsumerInterface
 {
     public function __construct(private readonly WriterPdf $writerPdf) {}
 

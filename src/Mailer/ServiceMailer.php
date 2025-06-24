@@ -62,10 +62,6 @@ class ServiceMailer
 
     public function htmlTemplate(string $template): self
     {
-        // if (!file_exists($this->template_path . '' . $template)) {
-        //     throw new FileNotFoundException('Le fichier ' . $template . ' est introuvable');
-        // }
-
         $this->templatedEmail->htmlTemplate($template);
 
         return $this;
@@ -76,13 +72,9 @@ class ServiceMailer
         return $this->templatedEmail->getHtmlTemplate();
     }
 
-    public function attachFile(string $filename, ?string $name): static
+    public function attachFile(string $path, ?string $name = null): static
     {
-        if (!$this->fileAttachement->exists($filename)) {
-            throw new FileNotFoundException('le fichier ' . $this->fileAttachement->getPathFile() . DIRECTORY_SEPARATOR . $filename . ' introuvable');
-        }
-
-        $this->templatedEmail->attachFromPath($this->fileAttachement->getPathFile() . DIRECTORY_SEPARATOR . $filename, $name);
+        $this->templatedEmail->attachFromPath($path, $name);
 
         return $this;
     }

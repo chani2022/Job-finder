@@ -2,24 +2,16 @@
 
 namespace App\Tests\src\Mailer;
 
-use App\Entity\User;
 use App\Mailer\ServiceMailer;
 use App\Service\FileEmailAttachementLocator;
 use App\Service\FilesystemLocatorTemplate;
 use BadMethodCallException;
-use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Bundle\FrameworkBundle\Test\MailerAssertionsTrait;
-use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
-use Symfony\Component\Mime\Address;
-use Symfony\Component\Mime\Part\DataPart;
+
 
 class ServiceMailerTest extends TestCase
 {
@@ -40,17 +32,12 @@ class ServiceMailerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        // self::bootKernel();
+
         $this->template_path = sys_get_temp_dir();
         $this->mailer = $this->createMock(MailerInterface::class);
         $this->templateLocator = new FilesystemLocatorTemplate($this->template_path);
         $this->fileEmail = new FileEmailAttachementLocator($this->template_path);
         $this->templatedEmail = $this->createMock(TemplatedEmail::class);
-        // $mailer = static::getContainer()->get(MailerInterface::class);
-        // $container = static::getContainer();
-        // $template_path = $container->getParameter('template_path');
-        // $dir_file_email_attachement = $container->getParameter('path_dest_images_test');
-
 
         $this->serviceMailer = new ServiceMailer(
             $this->mailer,
@@ -134,9 +121,7 @@ class ServiceMailerTest extends TestCase
     {
         $filename = 'test.pdf';
         $name = 'fake file';
-        $pathfile = $this->template_path . DIRECTORY_SEPARATOR . $filename;
-
-        file_put_contents($pathfile, 'attach file test');
+        $pathfile = 'test' . DIRECTORY_SEPARATOR . $filename;
 
         $this->templatedEmail->expects($this->once())
             ->method('attachFromPath')
@@ -146,20 +131,12 @@ class ServiceMailerTest extends TestCase
         $this->templatedEmail->expects($this->once())
             ->method('getAttachments')
             ->willReturn([
-                $name
+                $pathfile
             ]);
 
-        $this->serviceMailer->attachFile($filename, $name);
-        $this->assertEquals([$name], $this->serviceMailer->getAttachFile());
-        unlink($pathfile);
-    }
+        $this->serviceMailer->attachFile($pathfile, $name);
 
-    public function testAttachFileWithFileNotExist(): void
-    {
-        $filename = 'test.pdf';
-        $this->expectException(FileNotFoundException::class);
-
-        $this->serviceMailer->attachFile($filename, 'test');
+        $this->assertEquals([$pathfile], $this->serviceMailer->getAttachFile());
     }
 
     public function testContextSuccess(): void
