@@ -8,9 +8,9 @@ services:
     environment:
       MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: "1"
       MARIADB_DATABASE: api-platform
-      # MARIADB_USER: symfony
-      # MARIADB_PASSWORD: secret
-      # MARIADB_ROOT_PASSWORD: secret
+    # MARIADB_USER: symfony
+    # MARIADB_PASSWORD: secret
+    # MARIADB_ROOT_PASSWORD: secret
 
     ports:
       - '3307:3306'
@@ -23,8 +23,8 @@ services:
     environment:
       DATABASE_ALLOW_NO_PASSWORD: "yes"
       DATABASE_HOST: database
-      # DATABASE_USER: root
-      # DATABASE_PASSWORD: secret
+    # DATABASE_USER: root
+    # DATABASE_PASSWORD: secret
     ports:
       - '8081:8080'
       - '8443:8443'
@@ -43,8 +43,8 @@ services:
       - database
       - phpadmin
       - meilisearch
-    # command: bash -c "php bin/console meili:create --env=test"
-    # command: bash -c "ls -la /var/www/docker.local"
+  # command: bash -c "php bin/console meili:create --env=test"
+  # command: bash -c "ls -la /var/www/docker.local"
   meilisearch:
     image: getmeili/meilisearch:v1.4.0
     container_name: meilisearch
@@ -58,6 +58,19 @@ services:
       - "7700:7700" # Port exposé (HTTP)
     restart: unless-stopped
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"      # Port pour les connexions AMQP (Symfony, Node, etc.)
+      - "15672:15672"    # Port pour l'interface web (http://localhost:15672)
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
 volumes:
   mariadb-data:
   meilisearch_data:
+  rabbitmq_data:
