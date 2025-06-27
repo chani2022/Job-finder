@@ -58,7 +58,7 @@ jobs:
         run: |
           docker exec $(docker ps -qf "name=app") php bin/console meili:add-primaryKey
 
-      - name: Add primary key meilisearch
+      - name: Run consumer rabbitmq
         run: |
           docker exec $(docker ps -qf "name=app") php bin/console rabbitmq:consumer -m 50 generate_pdf_send_email -v
 

@@ -70,6 +70,7 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
+
 volumes:
   mariadb-data:
   meilisearch_data:
