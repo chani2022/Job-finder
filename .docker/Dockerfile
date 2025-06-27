@@ -28,6 +28,7 @@ RUN apt-get update && apt-get install -y \
     opcache \
     xml \
     curl \
+    ext-sockets \
     && rm -rf /var/lib/apt/lists/*
 
 # RUN curl -sS https://get.symfony.com/cli/installer | bash
