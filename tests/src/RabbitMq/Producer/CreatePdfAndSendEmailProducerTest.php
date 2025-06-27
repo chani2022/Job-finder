@@ -29,7 +29,7 @@ class CreatePdfAndSendEmailProducerTest extends TestCase
 
         $this->generatePdfproducer->expects($this->once())
             ->method('publish')
-            ->with(serialize($data));
+            ->with(json_encode($data));
 
         $this->pdfEmailProducer->publishPdfAndEmail($data);
     }

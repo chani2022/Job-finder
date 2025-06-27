@@ -100,6 +100,11 @@ class ServiceMailer
         return  $this->templatedEmail->getContext();
     }
 
+    public function getDirFileEmailLocator(): string
+    {
+        return $this->fileAttachement->getPathFile();
+    }
+
     public function send(): void
     {
         $this->mailer->send($this->templatedEmail);

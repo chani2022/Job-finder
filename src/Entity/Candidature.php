@@ -21,6 +21,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
             'read:collection:candidature'
         ]
     ],
+
     operations: [
         new Post(
             inputFormats: ['multipart' => ['multipart/form-data']],
@@ -40,7 +41,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
                                         'type' => 'string',
                                         'format' => 'binary'
                                     ],
-                                    'offreEmploi' => [
+                                    'id_offre' => [
                                         'type' => 'string',
                                         'format' => 'string'
                                     ],

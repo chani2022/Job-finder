@@ -25,7 +25,7 @@ parameters:
     template_path: '%kernel.project_dir%/templates/'
 
     #dir output pdf
-    dir_output_pdf: '%kernel.project_dir%/pdf'
+    dir_output_pdf: '%kernel.project_dir%/public/pdf'
     
 services:
     # default configuration for services in *this* file

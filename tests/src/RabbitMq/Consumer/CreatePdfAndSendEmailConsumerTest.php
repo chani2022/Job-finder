@@ -2,41 +2,50 @@
 
 namespace App\Tests\src\RabbitMq\Consumer;
 
-use App\Pdf\WriterPdf;
+use App\Handler\CreatePdfAndSendEmailHandler;
 use App\RabbitMq\Consumer\CreatePdfAndSendEmailConsumer;
-use App\RabbitMq\Consumer\PdfConsumer;
 use PhpAmqpLib\Message\AMQPMessage;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class CreatePdfAndSendEmailConsumerTest extends TestCase
 {
-    private MockObject|WriterPdf|null $writerPdf;
+    private MockObject|CreatePdfAndSendEmailHandler|null $pdfEmailHandler;
     private CreatePdfAndSendEmailConsumer|null $pdfEmailConsumer;
 
     protected function setUp(): void
     {
-        $this->writerPdf = new WriterPdf(sys_get_temp_dir());
-        $this->pdfEmailConsumer = new CreatePdfAndSendEmailConsumer($this->writerPdf);
+        $this->pdfEmailHandler = $this->createMock(CreatePdfAndSendEmailHandler::class);
+        $this->pdfEmailConsumer = new CreatePdfAndSendEmailConsumer($this->pdfEmailHandler);
     }
-    /**
-     * @dataProvider getData
-     */
-    public function testExecutePdfSuccess(array $data): void
+
+    public function testExecutePdfAndSendEmailSuccess(): void
     {
-        $msg = new AMQPMessage(serialize($data));
-        $expected = $this->pdfEmailConsumer->execute($msg);
+        $data = [
+            'lettre_motivation_pdf' => [
+                'title' => 'titre',
+                'content' => 'mon contenu',
+                'filename' => 'lettreMotivation.pdf',
+                'name' => 'test'
+            ],
 
-        $dir_output_pdf = $this->writerPdf->getDirOutputPdf();
-        $name = $data['nom'] ?
-            $data['nom'] . '_' . $data['prenom'] :
-            $data['email'];
+            'email' => [
+                'to' => 'to@to.com',
+                'from' => 'from@from.com',
+                'cv_filename' => 'cv.pdf',
+                'cv_name' => 'test',
+                'htmlTemplate' => 'test.html.twig'
+            ]
+        ];
 
-        $filename = $dir_output_pdf . DIRECTORY_SEPARATOR . $name . '.pdf';
+        $amqpMessage = new AMQPMessage(json_encode($data));
 
-        $this->assertFileExists($filename);
+        $this->pdfEmailHandler->expects($this->once())
+            ->method('handlerPdfAndEmail')
+            ->with($data);
+
+        $expected = $this->pdfEmailConsumer->execute($amqpMessage);
         $this->assertTrue($expected);
-        unlink($filename);
     }
 
     public static function getData(): array
@@ -63,7 +72,7 @@ class CreatePdfAndSendEmailConsumerTest extends TestCase
      */
     public function testExecutePdfReturnFalse(array $data): void
     {
-        $msg = new AMQPMessage(serialize($data));
+        $msg = new AMQPMessage(json_encode($data));
         $expected = $this->pdfEmailConsumer->execute($msg);
 
         $this->assertFalse($expected);
@@ -73,22 +82,12 @@ class CreatePdfAndSendEmailConsumerTest extends TestCase
     {
         return [
             'no_keys' => [[]],
-            'email_required' => [
-                [
-                    'lettreMotivation' => 'lettre',
-                ],
-            ],
-            'lettre_required' => [
-                [
-                    'email' => 'test@test.test',
-                ],
-            ],
         ];
     }
 
     protected function tearDown(): void
     {
-        $this->writerPdf = null;
+        $this->pdfEmailHandler = null;
         $this->pdfEmailConsumer = null;
     }
 }

@@ -9,6 +9,6 @@ class CreatePdfAndSendEmailProducer
     public function __construct(private readonly ProducerInterface $generatePdfSendEmailProducer) {}
     public function publishPdfAndEmail(array $data)
     {
-        $this->generatePdfSendEmailProducer->publish(serialize($data));
+        $this->generatePdfSendEmailProducer->publish(json_encode($data));
     }
 }

@@ -45,7 +45,7 @@ class UserRepositoryTest extends KernelTestCase
     public static function provideUsernameOrEmail(): array
     {
         return [
-            "email" => ["test@test.com", "email"],
+            "email" => ["chaniandrianarinaivo@gmail.com", "email"],
             "username" => ["test", "username"]
         ];
     }

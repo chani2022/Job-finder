@@ -7,7 +7,10 @@ use ApiPlatform\Symfony\Bundle\Test\Client;
 use App\Traits\FixturesTrait;
 use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
 use App\Entity\OffreEmploi;
-use App\Entity\User;
+use App\Entity\Candidature;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use ApiPlatform\Symfony\Bundle\Test\Response;
+use App\Repository\CandidatureRepository;
 
 class PostCandidatureTest extends ApiTestCase
 {
@@ -23,34 +26,54 @@ class PostCandidatureTest extends ApiTestCase
         $this->loadFixturesTrait();
     }
 
-    // public function testPostCandidature(): void
-    // {
-    // /** @var OffreEmploi */
-    // $offreEmploi = $this->all_fixtures['offre_emploi'];
-    // $user = $this->all_fixtures['user_adm_society'];
+    public function testPostCandidature(): void
+    {
+        /** @var OffreEmploi */
+        $offreEmploi = $this->all_fixtures['offre_emploi'];
+        $user = $this->all_fixtures['user_adm_society'];
 
-    // $this->client->request('POST', '/api/candidatures', [
-    //     'headers' => [
-    //         'content-type' => 'multipart/form-data'
-    //     ],
-    //     'extra' => [
-    //         'parameters' => [
+        $path = $this->simulateFile();
 
-    //          // Vos données JSON (nom, prenom, email, username)
+        $this->client->loginUser($user);
+        /** @var Response */
+        $response = $this->client->request('POST', '/api/postuler/offre', [
+            'headers' => [
+                'content-type' => 'multipart/form-data'
+            ],
+            'extra' => [
+                'parameters' => [
+                    'id_offre' => $offreEmploi->getId(),
+                    'lettre' => 'Mon lettre de motivation'
+                ],
+                'files' => [
+                    'file' => new UploadedFile($path, 'cv.pdf', 'application/pdf', null, true),
+                ]
+            ]
+        ]);
 
-    //         'offreEmploi' => '/api/offre_emplois/'.$offreEmploi->getId(),
-    //         'candidat' => '/api/users/'.$user->getId(),
-    //         'pieceJointe' => [
-    //             'lettreMotivation' => 'test de lettre de motivation',
-    //             'owner' => '/api/users/'.$user->getId(),
-    //             'cv' => 
-    //         ]
-    //         ]
-    //     ]
-    // ]);
+        $this->assertResponseIsSuccessful();
 
-    // $this->assertResponseStatusCodeSame(401);
-    // }
+        $container = self::getContainer();
+        /** @var Candidature */
+        $candidature = $container->get(CandidatureRepository::class)->find(1);
+
+        $dir_dest_image = $container->getParameter('path_dest_images_test');
+        $path = $dir_dest_image . '' . $candidature->getPieceJointe()->getCv()->filePath;
+
+        $this->assertNotNull($candidature);
+        $this->assertFileExists($path);
+        // unlink($path);
+    }
+
+    private function simulateFile(): string
+    {
+        $filename = 'cv.pdf';
+        $tmp = sys_get_temp_dir();
+        $path = $tmp . DIRECTORY_SEPARATOR . $filename;
+        file_put_contents($path, '%PDF-1.4 file test');
+
+        return $path;
+    }
 
     protected function tearDown(): void
     {

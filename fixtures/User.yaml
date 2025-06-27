@@ -67,3 +67,10 @@ App\Entity\User:
         password: <hashPassword('test')>
         # society: '@unique_society'
         status: true
+
+    user_local:
+        email: chaniandrianarinaivo@gmail.com
+        username: chani
+        password: <hashPassword('test')>
+        # society: '@unique_society'
+        status: true

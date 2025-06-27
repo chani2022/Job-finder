@@ -19,4 +19,9 @@ App\Entity\OffreEmploi:
     description: <sentences(5,25)>
     # secteurActivite: '@secteur_unique'
     user: '@admin_adm_society'
-    
+  
+  offre_emploi_local:
+    titre: <sentences(2,10)>
+    description: <sentences(5,25)>
+    # secteurActivite: '@secteur_unique'
+    user: '@user_local'

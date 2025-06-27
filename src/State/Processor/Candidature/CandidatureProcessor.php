@@ -10,7 +10,7 @@ use App\Entity\MediaObject;
 use App\Entity\OffreEmploi;
 use App\Entity\PieceJointe;
 use App\Entity\User;
-use App\Mailer\ServiceMailer;
+use App\RabbitMq\Producer\CreatePdfAndSendEmailProducer;
 use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserProvider;
@@ -24,11 +24,11 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class CandidatureProcessor implements ProcessorInterface
 {
     public function __construct(
-        private readonly EntityManagerInterface $em,
+        private EntityManagerInterface $em,
         private ValidatorInterface $validator,
-        private readonly TokenStorageInterface $tokenStorage,
+        private TokenStorageInterface $tokenStorage,
         private JWTUserProvider $userProvider,
-        private readonly ServiceMailer $serviceMailer
+        private CreatePdfAndSendEmailProducer $pdfEmailProducer
     ) {}
     /**
      * @throws ValidatorException
@@ -43,6 +43,7 @@ class CandidatureProcessor implements ProcessorInterface
         array $context = []
     ) {
         $user = $this->getAuthenticatedUser();
+
 
         $this->checkKeyRequestFromContext($context);
         $this->checkKeysRequest($context['request']);
@@ -62,17 +63,13 @@ class CandidatureProcessor implements ProcessorInterface
 
         $this->save($candidature);
 
-        //envoye d'email
-        $filename = $candidature->getPieceJointe()->getCv()->filePath;
-        $name = $user->getNom() ? $user->getNom() . ' ' . $user->getPrenom() : $user->getEmail();
-        $this->serviceMailer
-            ->to($candidature->getOffreEmploi()->getUser()->getEmail())
-            ->from($user->getEmail())
-            ->htmlTemplate('emails/candidature.html.twig')
-            ->attachFile($filename, $name);
+        $data_to_publish = $this->getDataToCreatePdfAndSendEmail($candidature, $lettre);
+
+        $this->pdfEmailProducer->publishPdfAndEmail($data_to_publish);
 
         return $candidature;
     }
+
     /** 
      * @throws LogicException si utilisateur n'est présent ou ne pas une instance of de user
      */
@@ -83,8 +80,7 @@ class CandidatureProcessor implements ProcessorInterface
         if (!$token || !($user = $token->getUser()) instanceof User) {
             throw new LogicException('Aucun utilisateur authentifié.');
         }
-
-        return $this->userProvider->refreshUser($user);
+        return $this->em->getRepository(User::class)->find($user->getId());
     }
 
     /**
@@ -165,7 +161,6 @@ class CandidatureProcessor implements ProcessorInterface
         $media->file = $file;
         $media->filePath = $filename;
 
-
         $pieceJointe = (new PieceJointe())
             ->setLettreMotivation($lettre)
             ->setOwner($user)
@@ -183,5 +178,30 @@ class CandidatureProcessor implements ProcessorInterface
     {
         $this->em->persist($candidature);
         $this->em->flush();
+    }
+
+    public function getDataToCreatePdfAndSendEmail(Candidature $candidature, string $lettreMotivation): array
+    {
+        $cv_filename = $candidature->getPieceJointe()->getCv()->filePath;
+
+        $title_lettre_motivation = $cv_filename;
+        $lettre_motivation_filename = 'lettre_motivation.pdf';
+        $cv_name = $cv_filename;
+
+        return [
+            'lettre_motivation_pdf' => [
+                'title' =>  $title_lettre_motivation,
+                'content' => $lettreMotivation,
+                'filename' => $lettre_motivation_filename,
+                'name' => $cv_name
+            ],
+            'email' => [
+                'to' => $candidature->getOffreEmploi()->getUser()->getEmail(),
+                'from' => $candidature->getCandidat()->getEmail(),
+                'cv_filename' => $cv_filename,
+                'cv_name' => $cv_name,
+                'htmlTemplate' => 'emails/candidature.html.twig'
+            ]
+        ];
     }
 }

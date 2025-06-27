@@ -42,6 +42,7 @@ class LoginControllerTest extends ApiTestCase
             "json" => $identifiants
         ]);
         $infos = $response->getBrowserKitResponse()->toArray();
+
         $this->assertArrayHasKey("code", $infos);
         $this->assertArrayHasKey("message", $infos);
         $this->assertEquals(401, $infos["code"]);

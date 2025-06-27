@@ -2,35 +2,21 @@
 
 namespace App\RabbitMq\Consumer;
 
-use App\Pdf\WriterPdf;
+use App\Handler\CreatePdfAndSendEmailHandler;
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
 use PhpAmqpLib\Message\AMQPMessage;
 
 class CreatePdfAndSendEmailConsumer implements ConsumerInterface
 {
-    public function __construct(private readonly WriterPdf $writerPdf) {}
+    public function __construct(private CreatePdfAndSendEmailHandler $pdfEmailHandler) {}
 
     public function execute(AMQPMessage $msg): bool
     {
-        //Process picture upload.
-        //$msg will be an instance of `PhpAmqpLib\Message\AMQPMessage` with the $msg->body being the data sent over RabbitMQ.
-        $bodyArray = unserialize($msg->getBody());
-
-        if (!$bodyArray || !array_key_exists('lettreMotivation', $bodyArray) || !array_key_exists('email', $bodyArray)) {
+        $bodyArray = json_decode($msg->getBody(), true);
+        if (!$bodyArray) {
             return false;
         }
-
-        $filename = $bodyArray['email'] . '.pdf';
-        $title = $bodyArray['email'];
-        if (array_key_exists('nom', $bodyArray)) {
-            $filename = $bodyArray['nom'] . '_' . $bodyArray['prenom'] . '.pdf';
-            $title = $bodyArray['nom'] . '_' . $bodyArray['prenom'];
-        }
-
-        $this->writerPdf->addPage()
-            ->setTitle($title)
-            ->setContent($bodyArray['lettreMotivation'])
-            ->save($filename);
+        $this->pdfEmailHandler->handlerPdfAndEmail($bodyArray);
 
         return true;
     }

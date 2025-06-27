@@ -17,12 +17,13 @@ class CreatePdfAndSendEmailHandler
             ->save($data['lettre_motivation_pdf']['filename']);
 
         $path_lettreMotivation = $this->writerPdf->getDirOutputPdf() . DIRECTORY_SEPARATOR . $data['lettre_motivation_pdf']['filename'];
+        $path_cv = $this->serviceMailer->getDirFileEmailLocator() . '' . $data['email']['cv_filename'];
 
         $this->serviceMailer->to($data['email']['to'])
             ->from($data['email']['from'])
             ->htmlTemplate($data['email']['htmlTemplate'])
             ->attachFile($path_lettreMotivation)
-            ->attachFile($data['email']['cv_filename'])
+            ->attachFile($path_cv)
             ->send();
     }
 }

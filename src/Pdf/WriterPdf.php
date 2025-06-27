@@ -11,6 +11,7 @@ class WriterPdf
     public function __construct(
         private readonly string $dir_output_pdf,
         ?TCPDF $pdf = null
+
     ) {
         $this->pdf = $pdf ?? new TCPDF();
     }
